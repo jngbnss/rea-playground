@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "description": "NPC·퀘스트 상태별 허용 intent, 고정 대사(fallback), 게임이 처리하는 선택지. LLM 응답은 이 목록 밖의 intent를 낼 수 없고, 선택지만 게임 이벤트를 만든다.",
+  "banned_terms": ["인공지능", "AI", "컴퓨터", "인터넷", "휴대폰", "핸드폰", "게임", "플레이어", "퀘스트", "레벨", "버튼", "NPC", "LLM", "자동차", "기관총"],
+  "policy": {
+    "merchant_yun": {
+      "not_started": {
+        "allowed_intents": ["greet", "offer_quest", "small_talk", "farewell"],
+        "fallback": [
+          { "intent": "offer_quest", "emotion": "worried", "text": "어허, 칼 찬 나그네로구려. 북쪽 고갯길 도적에게 내 장부를 빼앗겼소. 찾아 주면 쉰 냥을 드리리다." },
+          { "intent": "greet", "emotion": "neutral", "text": "물건을 보러 왔소? 오늘은 장사할 기분이 아니라오." }
+        ],
+        "choices": [
+          { "id": "accept_quest", "label": "장부를 찾아오겠소.", "game_event": "accept_quest" },
+          { "id": "ask_more", "label": "도적은 어디에 있소?", "game_event": null },
+          { "id": "leave", "label": "(자리를 뜬다)", "game_event": null }
+        ]
+      },
+      "accepted": {
+        "allowed_intents": ["give_hint", "remind_objective", "small_talk", "farewell"],
+        "fallback": [
+          { "intent": "remind_objective", "emotion": "worried", "text": "고갯마루 너머 무너진 서낭당이오. 도적은 둘이니 부디 몸조심하시오." },
+          { "intent": "give_hint", "emotion": "neutral", "text": "장승을 지나거든 발소리를 죽이시오. 놈들은 불가에 모여 있을 게요." }
+        ],
+        "choices": [
+          { "id": "leave", "label": "(고갯길로 향한다)", "game_event": null }
+        ]
+      },
+      "item_recovered": {
+        "allowed_intents": ["thank", "greet", "farewell"],
+        "fallback": [
+          { "intent": "thank", "emotion": "surprised", "text": "허허, 이게 정말 내 장부란 말이오? 어서 이리 주시오!" }
+        ],
+        "choices": [
+          { "id": "hand_over_ledger", "label": "(장부를 건넨다)", "game_event": "turn_in_quest" }
+        ]
+      },
+      "completed": {
+        "allowed_intents": ["thank", "small_talk", "farewell"],
+        "fallback": [
+          { "intent": "thank", "emotion": "grateful", "text": "약속한 쉰 냥이오. 그대 덕에 마을 외상 장부가 무사하구려. 이 은혜 잊지 않으리다." },
+          { "intent": "farewell", "emotion": "happy", "text": "다음 장날에 들르시오. 좋은 무명 한 필 챙겨 두리다." }
+        ],
+        "choices": []
+      }
+    },
+    "innkeeper_deoksun": {
+      "not_started": {
+        "allowed_intents": ["greet", "give_hint", "small_talk", "farewell"],
+        "fallback": [
+          { "intent": "greet", "emotion": "happy", "text": "어서 오시우, 나그네 양반! 국밥 한 그릇 하고 가구려." },
+          { "intent": "give_hint", "emotion": "worried", "text": "윤 행수 얼굴 봤수? 고갯길 도적 때문에 속이 숯검댕이가 됐다우." }
+        ],
+        "choices": []
+      },
+      "accepted": {
+        "allowed_intents": ["give_hint", "remind_objective", "small_talk", "farewell"],
+        "fallback": [
+          { "intent": "give_hint", "emotion": "worried", "text": "도적은 둘인데 하나는 덩치가 산만 하다우. 해 질 녘엔 서낭당 쪽에 불을 피운다니께." },
+          { "intent": "farewell", "emotion": "neutral", "text": "몸 성히 다녀오시우. 국은 데워 놓을 테니." }
+        ],
+        "choices": []
+      },
+      "item_recovered": {
+        "allowed_intents": ["greet", "remind_objective", "small_talk", "farewell"],
+        "fallback": [
+          { "intent": "remind_objective", "emotion": "surprised", "text": "아이고, 무사히 돌아왔구먼! 그 장부, 어서 윤 행수한테 갖다주시우." }
+        ],
+        "choices": []
+      },
+      "completed": {
+        "allowed_intents": ["thank", "small_talk", "farewell"],
+        "fallback": [
+          { "intent": "thank", "emotion": "happy", "text": "호호, 장터에 소문 쫙 났수. 오늘 국밥은 내가 내리다!" }
+        ],
+        "choices": []
+      }
+    }
+  }
+}

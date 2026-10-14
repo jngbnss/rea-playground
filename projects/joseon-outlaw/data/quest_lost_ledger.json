@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "id": "lost_ledger",
+  "title": "빼앗긴 장부",
+  "giver": "merchant_yun",
+  "initial": "not_started",
+  "terminal": ["completed"],
+  "reward": { "item": "coin", "amount": 50 },
+  "states": {
+    "not_started": {
+      "objective": "장터의 윤 행수와 이야기한다",
+      "marker": "merchant_yun",
+      "prompt_context": "나그네는 아직 의뢰를 받지 않았다."
+    },
+    "accepted": {
+      "objective": "북쪽 고갯길의 도적 소굴에서 장부를 되찾는다",
+      "marker": "bandit_camp",
+      "prompt_context": "나그네가 장부 회수를 맡았고 아직 찾지 못했다."
+    },
+    "item_recovered": {
+      "objective": "윤 행수에게 장부를 돌려준다",
+      "marker": "merchant_yun",
+      "prompt_context": "나그네가 도적을 물리치고 장부를 되찾아 마을로 가져왔다. 아직 윤 행수에게 건네지 않았다."
+    },
+    "completed": {
+      "objective": "",
+      "marker": null,
+      "prompt_context": "나그네가 장부를 돌려주었고 윤 행수는 쉰 냥을 보상으로 주었다."
+    }
+  },
+  "transitions": [
+    {
+      "from": "not_started",
+      "event": "accept_quest",
+      "to": "accepted",
+      "source": "dialogue choice merchant_yun.accept_quest"
+    },
+    {
+      "from": "accepted",
+      "event": "ledger_picked_up",
+      "to": "item_recovered",
+      "guard": "world.bandits_defeated == 2",
+      "source": "bandit_camp 상자 상호작용 (두 도적이 쓰러져야 상자가 열린다)"
+    },
+    {
+      "from": "item_recovered",
+      "event": "turn_in_quest",
+      "to": "completed",
+      "effects": ["remove_item:ledger", "give_coin:50", "trigger:demo_end_sequence"],
+      "source": "dialogue choice merchant_yun.hand_over_ledger"
+    }
+  ],
+  "persistence": "플레이어가 쓰러지면 마지막 체크포인트에서 부활하고 퀘스트 상태와 처치한 도적 수는 유지된다.",
+  "ignored_events_note": "정의되지 않은 (상태, 이벤트) 조합은 무시하고 로그만 남긴다. 예: 수락 전 상자 상호작용."
+}

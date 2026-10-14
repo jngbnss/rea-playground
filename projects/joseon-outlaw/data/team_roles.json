@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "description": "계획서 6절의 역할. CODEOWNERS 팀 이름과 라이선스 대장 owner 칸이 이 목록을 쓴다. 사람 배정은 팀원 조사(계획서 12절 1번) 후에 채운다.",
+  "roles": {
+    "tech-lead":         { "title": "테크 리드·통합",   "github_team": "@joseon-outlaw/tech-lead",         "member": null },
+    "player-camera":     { "title": "플레이어·카메라",   "github_team": "@joseon-outlaw/player-camera",     "member": null },
+    "combat-ai":         { "title": "전투·적 AI",        "github_team": "@joseon-outlaw/combat-ai",         "member": null },
+    "world-art":         { "title": "월드·테크 아트",    "github_team": "@joseon-outlaw/world-art",         "member": null },
+    "ai-backend":        { "title": "AI 백엔드·TTS·사운드 수급", "github_team": "@joseon-outlaw/ai-backend", "member": null },
+    "quest-dialogue-ui": { "title": "퀘스트·대화·UI",    "github_team": "@joseon-outlaw/quest-dialogue-ui", "member": null }
+  },
+  "review_pairs": [
+    ["player-camera", "combat-ai"],
+    ["world-art", "quest-dialogue-ui"],
+    ["ai-backend", "tech-lead"]
+  ]
+}

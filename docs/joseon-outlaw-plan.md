@@ -336,20 +336,25 @@ LLM 응답만으로 퀘스트나 전투 상태가 변경되어서는 안 된다.
 
 ## 12. 지금부터 할 일
 
-구현을 시작하기 전 다음 순서대로 진행한다.
+구현을 시작하기 전 다음 순서대로 진행한다. 2026-10-14 검토에서 아트 디렉션·UI·사운드 항목을 추가하고 순서를 바꿨다.
+산출물은 [`projects/joseon-outlaw/`](../projects/joseon-outlaw/README.md)에 있고, 표시한 항목은 **초안 완료, 팀 확정 필요** 상태다.
 
-1. [ ] 팀원별 Godot, 3D, Python, AI 경험 조사
-2. [ ] 최종 시연 PC와 팀 내 최저 사양 PC 기록
-3. [ ] 플레이어 모델과 공격·피격 애니메이션 후보 선정
-4. [ ] 한옥·시장·숲 환경 에셋 후보와 라이선스 선정
-5. [ ] 8~10분 시연 스토리보드 작성
-6. [ ] Godot 후보 버전과 주요 플러그인 호환성 표 작성
-7. [ ] Ollama·llama.cpp와 LLM 후보 벤치마크 계획 작성
-8. [ ] AI 요청·응답 JSON 스키마 확정
-9. [ ] 퀘스트 상태도와 NPC FSM 확정
-10. [ ] 저장소 브랜치, PR, 씬 소유권 규칙 확정
-11. [ ] 라이선스 대장 템플릿 생성
-12. [ ] 1주차 기술 스파이크 실행 여부 결정
+1. [ ] 팀원별 Godot, 3D, Python, AI 경험 조사 (특히 3D 아트·애니메이션 가능 여부)
+2. [x] 아트 디렉션 문서 — [02](../projects/joseon-outlaw/docs/02-art-direction.md)
+3. [x] 8~10분 시연 스토리보드 작성 — [03](../projects/joseon-outlaw/docs/03-storyboard.md)
+4. [x] 플레이어 모델과 공격·피격 애니메이션 후보 선정 — [04](../projects/joseon-outlaw/docs/04-character-animation.md)
+5. [x] 한옥·시장·숲 환경 에셋 후보와 라이선스 선정 — [05](../projects/joseon-outlaw/docs/05-environment-assets.md)
+6. [x] UI 시안과 서체 — [06](../projects/joseon-outlaw/docs/06-ui-design.md)
+7. [x] 사운드·BGM 수급 계획 — [07](../projects/joseon-outlaw/docs/07-audio-plan.md)
+8. [ ] 최종 시연 PC와 팀 내 최저 사양 PC 기록
+9. [x] Godot 후보 버전과 주요 플러그인 호환성 표 작성 — [09](../projects/joseon-outlaw/docs/09-godot-compat.md)
+10. [x] Ollama·llama.cpp와 LLM 후보 벤치마크 계획 작성 — [10](../projects/joseon-outlaw/docs/10-llm-benchmark-plan.md)
+11. [x] AI 요청·응답 JSON 스키마 확정 — [schemas](../projects/joseon-outlaw/schemas/)
+12. [x] 퀘스트 상태도와 NPC FSM 확정 — [12](../projects/joseon-outlaw/docs/12-quest-npc-fsm.md)
+13. [x] 저장소 브랜치, PR, 씬 소유권 규칙 확정 — [13](../projects/joseon-outlaw/docs/13-repo-rules.md)
+14. [x] 라이선스 대장 템플릿 생성 — [14](../projects/joseon-outlaw/docs/14-license-ledger.md)
+
+"1주차 기술 스파이크 실행 여부 결정"은 삭제했다. 결정할 문제가 아니라 1주차에 그냥 하는 일이다.
 
 ## 13. 최종 완료 정의
 

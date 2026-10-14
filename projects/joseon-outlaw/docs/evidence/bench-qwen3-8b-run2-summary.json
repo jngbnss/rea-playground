@@ -1,0 +1,17 @@
+{
+  "cases": 40,
+  "ttft_p50_s": 6.899,
+  "ttft_p95_s": 12.499,
+  "total_p50_s": 8.586,
+  "total_p95_s": 14.224,
+  "no_response_rate": 0.0,
+  "json_parse_rate": 1.0,
+  "policy_pass_rate": 0.925,
+  "state_reflection_rate": 0.667,
+  "world_violation_rate": 0.025,
+  "forbidden_payout_hits": 0,
+  "fallback_valid_rate": 1.0,
+  "vram_peak_mib": 6450,
+  "warmup_s": 55.9,
+  "model": "qwen3:8b"
+}

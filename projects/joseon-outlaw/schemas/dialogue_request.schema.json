@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://joseon-outlaw.local/schemas/dialogue_request.schema.json",
+  "title": "DialogueRequest",
+  "description": "Godot 클라이언트 → AI 서버. 게임 상태는 읽기 전용 문맥으로만 전달한다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "request_id", "npc_id", "quest", "history"],
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{8,64}$",
+      "description": "클라이언트가 만든 고유 ID. 늦게 도착한 응답을 버릴 때 쓴다."
+    },
+    "npc_id": { "enum": ["merchant_yun", "innkeeper_deoksun"] },
+    "quest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "state"],
+      "properties": {
+        "id": { "const": "lost_ledger" },
+        "state": { "enum": ["not_started", "accepted", "item_recovered", "completed"] }
+      }
+    },
+    "player_input": {
+      "description": "선택지 ID 또는 자유 입력. 둘 다 없으면 NPC가 먼저 말을 건다.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "choice_id": { "type": "string", "maxLength": 64 },
+        "text": { "type": "string", "maxLength": 200 }
+      }
+    },
+    "history": {
+      "type": "array",
+      "maxItems": 6,
+      "description": "최근 대화 4~6턴. 오래된 턴은 클라이언트가 잘라서 보낸다.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "text"],
+        "properties": {
+          "role": { "enum": ["player", "npc"] },
+          "text": { "type": "string", "maxLength": 200 }
+        }
+      }
+    },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "대사 표현에만 쓰는 사실. 서버는 이 값을 바꾸지 않는다.",
+      "properties": {
+        "bandits_defeated": { "type": "integer", "minimum": 0, "maximum": 2 },
+        "player_location": { "enum": ["village", "mountain_path", "bandit_camp"] }
+      }
+    },
+    "timeout_ms": { "type": "integer", "minimum": 500, "maximum": 8000, "default": 3000 }
+  }
+}

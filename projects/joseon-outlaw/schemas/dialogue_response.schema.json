@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://joseon-outlaw.local/schemas/dialogue_response.schema.json",
+  "title": "DialogueResponse",
+  "description": "AI 서버 → Godot 클라이언트. 대사 표현만 담고, 게임 상태를 바꾸는 필드는 두지 않는다.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["text", "emotion", "intent"],
+  "properties": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 90,
+      "description": "대화창 2줄 이내. 줄바꿈 금지."
+    },
+    "emotion": {
+      "enum": ["neutral", "happy", "worried", "angry", "sad", "surprised", "grateful"]
+    },
+    "intent": {
+      "enum": ["greet", "offer_quest", "give_hint", "remind_objective", "thank", "small_talk", "farewell"],
+      "description": "허용 여부는 dialogue_policy.json의 NPC·퀘스트 상태별 목록으로 다시 검사한다."
+    },
+    "source": {
+      "enum": ["llm", "fallback"],
+      "description": "서버가 채운다. 클라이언트 로그와 지표용."
+    }
+  }
+}

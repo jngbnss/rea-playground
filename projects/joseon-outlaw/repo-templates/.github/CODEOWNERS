@@ -1,0 +1,27 @@
+# 씬 소유권: 이 경로의 파일을 바꾸는 PR은 소유자의 승인이 필요하다.
+# 팀 이름은 projects/joseon-outlaw/data/team_roles.json 과 같아야 한다.
+
+*                         @joseon-outlaw/tech-lead
+
+/game/project.godot       @joseon-outlaw/tech-lead
+/game/addons/             @joseon-outlaw/tech-lead
+/game/autoload/           @joseon-outlaw/tech-lead
+/game/autoload/quest_manager.gd  @joseon-outlaw/quest-dialogue-ui
+/game/autoload/ai_client.gd      @joseon-outlaw/ai-backend
+
+/game/scenes/player/      @joseon-outlaw/player-camera
+/game/scenes/combat/      @joseon-outlaw/combat-ai
+/game/scenes/npc/bandit/  @joseon-outlaw/combat-ai
+/game/scenes/npc/villager/ @joseon-outlaw/quest-dialogue-ui
+/game/scenes/world/       @joseon-outlaw/world-art
+/game/scenes/ui/          @joseon-outlaw/quest-dialogue-ui
+
+/game/assets/characters/  @joseon-outlaw/world-art
+/game/assets/animations/  @joseon-outlaw/player-camera
+/game/assets/environment/ @joseon-outlaw/world-art
+/game/assets/audio/       @joseon-outlaw/ai-backend
+/game/assets/fonts/       @joseon-outlaw/quest-dialogue-ui
+
+/game/data/               @joseon-outlaw/quest-dialogue-ui
+/ai_server/               @joseon-outlaw/ai-backend
+/docs/license-ledger.csv  @joseon-outlaw/tech-lead

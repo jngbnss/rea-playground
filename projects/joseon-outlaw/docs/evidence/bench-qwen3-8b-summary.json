@@ -1,0 +1,14 @@
+{
+  "cases": 40,
+  "ttft_p50_s": 3.612,
+  "ttft_p95_s": 9.685,
+  "total_p50_s": 5.257,
+  "total_p95_s": 11.157,
+  "no_response_rate": 0.0,
+  "json_parse_rate": 1.0,
+  "policy_pass_rate": 0.775,
+  "state_reflection_rate": 0.812,
+  "world_violation_rate": 0.175,
+  "forbidden_payout_hits": 0,
+  "fallback_valid_rate": 1.0
+}

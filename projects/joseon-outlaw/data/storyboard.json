@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0",
+  "target_total_s": [480, 600],
+  "beats": [
+    {
+      "id": "B01", "title": "청송골 도착", "location": "village",
+      "duration_s": { "min": 30, "target": 40, "max": 60 },
+      "quest_state": "not_started",
+      "camera": "오프닝: 고갯길 위에서 마을을 내려다보는 크레인 샷 6초 → 주인공 등 뒤로 내려와 조작 시작",
+      "player_does": "마을 입구로 걸어 들어온다. 장승과 주막 불빛이 시선을 끈다",
+      "teaches": ["이동", "카메라"],
+      "dialogue": [],
+      "events": [],
+      "audio": ["bgm_village", "amb_village"],
+      "visual_beat": "마을 입구 역광 실루엣 (아트 완성 기준 장면 1)"
+    },
+    {
+      "id": "B02", "title": "주막의 소문", "location": "village",
+      "duration_s": { "min": 0, "target": 45, "max": 75 },
+      "quest_state": "not_started",
+      "optional": true,
+      "camera": "대화 시 어깨 너머 2인 구도, 컷 없이 부드럽게 줌",
+      "player_does": "덕순 주모와 대화. 윤 행수와 도적 소문을 듣는다",
+      "teaches": ["상호작용"],
+      "dialogue": [{ "npc": "innkeeper_deoksun", "state": "not_started" }],
+      "events": [],
+      "audio": ["ui_dialogue_open"],
+      "visual_beat": null
+    },
+    {
+      "id": "B03", "title": "윤 행수의 의뢰", "location": "village",
+      "duration_s": { "min": 40, "target": 60, "max": 90 },
+      "quest_state": "not_started",
+      "camera": "윤 행수 클로즈업 → 수락 순간 북쪽 고갯길로 카메라가 잠깐 돌아간다(목표 제시)",
+      "player_does": "의뢰를 듣고 '장부를 찾아오겠소' 선택",
+      "teaches": ["선택지", "퀘스트 목표 표시"],
+      "dialogue": [{ "npc": "merchant_yun", "state": "not_started" }],
+      "events": ["accept_quest"],
+      "audio": ["ui_choice_confirm", "sting_quest_accept"],
+      "visual_beat": null
+    },
+    {
+      "id": "B04", "title": "북쪽 고갯길", "location": "mountain_path",
+      "duration_s": { "min": 60, "target": 90, "max": 120 },
+      "quest_state": "accepted",
+      "camera": "자유. 장승을 지날 때 BGM 전환",
+      "player_does": "달려서 산길을 오른다. 개울 징검다리를 점프로 건넌다",
+      "teaches": ["달리기", "점프"],
+      "dialogue": [],
+      "events": [],
+      "audio": ["bgm_mountain", "amb_mountain"],
+      "visual_beat": null
+    },
+    {
+      "id": "B05", "title": "고갯마루", "location": "mountain_path",
+      "duration_s": { "min": 10, "target": 20, "max": 30 },
+      "quest_state": "accepted",
+      "camera": "능선에 서면 카메라가 살짝 뒤로 빠지며 안개 낀 산 능선을 보여 준다(조작 유지)",
+      "player_does": "멀리 서낭당 쪽 모닥불 연기를 발견한다",
+      "teaches": [],
+      "dialogue": [],
+      "events": [],
+      "audio": [],
+      "visual_beat": "겹겹의 산 능선과 대기 원근 (아트 완성 기준 장면 2)"
+    },
+    {
+      "id": "B06", "title": "도적 소굴", "location": "bandit_camp",
+      "duration_s": { "min": 60, "target": 120, "max": 180 },
+      "quest_state": "accepted",
+      "camera": "도적 alert 순간 짧은 줌인. 전투 중 Phantom Camera 락온 없이 자동 프레이밍",
+      "player_does": "도적 둘과 싸운다. 한 명씩 공격해 오고, 예고 동작을 보고 먼저 벤다",
+      "teaches": ["공격", "적 예고 동작 읽기"],
+      "dialogue": [],
+      "events": [],
+      "world_events": ["bandit_1:hp_zero", "bandit_2:hp_zero"],
+      "audio": ["vo_bandit_alert", "bgm_combat", "sfx_enemy_windup", "sfx_sword_swing", "sfx_sword_hit", "amb_campfire"],
+      "visual_beat": "모닥불 역광 속 도적 실루엣 (아트 완성 기준 장면 3)"
+    },
+    {
+      "id": "B07", "title": "장부 회수", "location": "bandit_camp",
+      "duration_s": { "min": 10, "target": 20, "max": 30 },
+      "quest_state": "accepted",
+      "camera": "상자 열기 짧은 클로즈업 1.5초",
+      "player_does": "잠겨 있던 상자를 열어 장부를 얻는다",
+      "teaches": [],
+      "dialogue": [],
+      "events": ["ledger_picked_up"],
+      "audio": ["sfx_chest_open", "sting_item_get"],
+      "visual_beat": null
+    },
+    {
+      "id": "B08", "title": "귀환", "location": "mountain_path",
+      "duration_s": { "min": 40, "target": 70, "max": 100 },
+      "quest_state": "item_recovered",
+      "camera": "자유. 내리막 지름길(올라올 때는 막혀 있던 사다리)",
+      "player_does": "지름길로 마을에 돌아온다. 주모가 반겨 준다(선택)",
+      "teaches": [],
+      "dialogue": [{ "npc": "innkeeper_deoksun", "state": "item_recovered" }],
+      "events": [],
+      "audio": ["bgm_village", "amb_village"],
+      "visual_beat": null
+    },
+    {
+      "id": "B09", "title": "보고와 보상", "location": "village",
+      "duration_s": { "min": 40, "target": 50, "max": 70 },
+      "quest_state": "item_recovered",
+      "camera": "장부를 건넬 때 손 클로즈업 → 윤 행수 표정 → 대화",
+      "player_does": "장부를 건네고 쉰 냥을 받는다",
+      "teaches": [],
+      "dialogue": [{ "npc": "merchant_yun", "state": "item_recovered" }, { "npc": "merchant_yun", "state": "completed" }],
+      "events": ["turn_in_quest"],
+      "audio": ["sfx_coin", "sting_quest_complete"],
+      "visual_beat": null
+    },
+    {
+      "id": "B10", "title": "엔딩 카드", "location": "village",
+      "duration_s": { "min": 20, "target": 25, "max": 30 },
+      "quest_state": "completed",
+      "camera": "카메라가 위로 빠지며 해 지는 마을 전경 → 제목 로고 → 크레딧",
+      "player_does": "조작 없음",
+      "teaches": [],
+      "dialogue": [],
+      "events": [],
+      "audio": [],
+      "visual_beat": null
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "machines": {
+    "bandit": {
+      "description": "도적 2명 공용. 공격 토큰으로 동시에 한 명만 공격해 플레이어가 읽을 수 있는 전투를 만든다.",
+      "initial": "patrol",
+      "terminal": ["dead"],
+      "params": {
+        "hp": 60,
+        "sight_range_m": 14.0,
+        "sight_fov_deg": 110,
+        "hearing_range_m": 6.0,
+        "alert_time_s": 0.8,
+        "attack_range_m": 2.2,
+        "attack_windup_s": 0.45,
+        "attack_cooldown_s": [1.2, 1.8],
+        "stagger_s": 0.4,
+        "leash_m": 25.0,
+        "lose_sight_s": 4.0,
+        "attack_tokens": 1
+      },
+      "states": {
+        "patrol":  { "anim": "walk",        "note": "웨이포인트를 돈다. 불가 근처에서 idle_sit로 쉰다." },
+        "alert":   { "anim": "alert_look",  "note": "멈추고 소리 지른다. 동료에게 alert 전파. 플레이어가 반응할 시간." },
+        "chase":   { "anim": "run",         "note": "NavigationAgent3D로 추적." },
+        "attack":  { "anim": "sword_slash", "note": "windup 동안 무기 반짝임으로 예고. 토큰이 없으면 chase에서 거리를 두고 원을 돈다." },
+        "stagger": { "anim": "hit_react",   "note": "피격 경직. 히트스톱 0.06s와 함께." },
+        "return":  { "anim": "walk",        "note": "집 위치로 복귀하며 체력 회복 없음." },
+        "dead":    { "anim": "death",       "note": "래그돌 대신 사망 애니메이션 후 정지. bandits_defeated += 1." }
+      },
+      "transitions": [
+        { "from": "patrol",  "event": "player_seen",      "to": "alert" },
+        { "from": "patrol",  "event": "player_heard",     "to": "alert" },
+        { "from": "patrol",  "event": "ally_alerted",     "to": "chase" },
+        { "from": "alert",   "event": "alert_timeout",    "to": "chase" },
+        { "from": "chase",   "event": "in_attack_range",  "to": "attack", "guard": "attack_token_acquired" },
+        { "from": "chase",   "event": "lost_sight",       "to": "return" },
+        { "from": "chase",   "event": "leash_exceeded",   "to": "return" },
+        { "from": "attack",  "event": "attack_finished",  "to": "chase", "effects": ["release_attack_token"] },
+        { "from": "alert",   "event": "hit_received",     "to": "stagger" },
+        { "from": "chase",   "event": "hit_received",     "to": "stagger" },
+        { "from": "attack",  "event": "hit_received",     "to": "stagger", "effects": ["release_attack_token"] },
+        { "from": "patrol",  "event": "hit_received",     "to": "stagger" },
+        { "from": "return",  "event": "hit_received",     "to": "stagger" },
+        { "from": "stagger", "event": "stagger_end",      "to": "chase" },
+        { "from": "return",  "event": "player_seen",      "to": "chase" },
+        { "from": "return",  "event": "reached_home",     "to": "patrol" },
+        { "from": "*",       "event": "hp_zero",          "to": "dead", "effects": ["release_attack_token", "world.bandits_defeated += 1"] }
+      ]
+    },
+    "villager": {
+      "description": "윤 행수, 덕순 주모 공용. 플레이어가 다가오면 대사를 미리 요청(prefetch)해 체감 지연을 숨긴다.",
+      "initial": "idle",
+      "terminal": [],
+      "params": {
+        "notice_range_m": 6.0,
+        "interact_range_m": 2.5,
+        "wander_interval_s": [6, 12]
+      },
+      "states": {
+        "idle":       { "anim": "idle_work",  "note": "자기 일(물건 정리, 국 젓기)을 한다." },
+        "wander":     { "anim": "walk",       "note": "가게 주변 2~3개 지점만 오간다." },
+        "notice":     { "anim": "turn_head",  "note": "플레이어 쪽으로 고개를 돌린다. 이 순간 AI 대사 prefetch 요청." },
+        "talking":    { "anim": "talk",       "note": "대화창 열림. emotion 값으로 표정·제스처 선택." },
+        "returning":  { "anim": "walk",       "note": "원래 자리로 돌아간다." }
+      },
+      "transitions": [
+        { "from": "idle",      "event": "wander_timer",    "to": "wander" },
+        { "from": "wander",    "event": "reached_point",   "to": "idle" },
+        { "from": "idle",      "event": "player_near",     "to": "notice", "effects": ["prefetch_dialogue"] },
+        { "from": "wander",    "event": "player_near",     "to": "notice", "effects": ["prefetch_dialogue"] },
+        { "from": "notice",    "event": "player_left",     "to": "returning" },
+        { "from": "notice",    "event": "interact",        "to": "talking" },
+        { "from": "talking",   "event": "dialogue_closed", "to": "notice" },
+        { "from": "returning", "event": "reached_point",   "to": "idle" },
+        { "from": "returning", "event": "player_near",     "to": "notice", "effects": ["prefetch_dialogue"] }
+      ]
+    }
+  }
+}

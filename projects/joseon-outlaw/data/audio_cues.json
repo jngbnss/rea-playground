@@ -1,0 +1,36 @@
+{
+  "schema_version": "1.0",
+  "buses": {
+    "Music": { "default_db": -8 },
+    "Ambience": { "default_db": -12 },
+    "SFX": { "default_db": -4 },
+    "Voice": { "default_db": -2 },
+    "UI": { "default_db": -10 }
+  },
+  "cues": {
+    "bgm_village":        { "bus": "Music",    "loop": true,  "priority": "P0", "trigger": "마을 영역 진입", "source": "gongu-gugak-bgm", "mood": "고요함, 느린 대금·가야금. 사람 사는 온기", "crossfade_s": 2.0 },
+    "bgm_mountain":       { "bus": "Music",    "loop": true,  "priority": "P1", "trigger": "장승을 지나 산길 진입", "source": "gongu-gugak-bgm", "mood": "긴장, 낮은 장구 박, 여백 많게", "crossfade_s": 3.0 },
+    "bgm_combat":         { "bus": "Music",    "loop": true,  "priority": "P0", "trigger": "도적 하나라도 chase/attack 상태", "source": "gongu-gugak-bgm", "mood": "빠른 북·꽹과리. 전투 종료 후 4초 뒤 이전 BGM으로", "crossfade_s": 1.0 },
+    "sting_quest_accept": { "bus": "Music",    "loop": false, "priority": "P0", "trigger": "quest accepted", "source": "gongu-gugak-sfx", "mood": "짧은 징 + 피리 한 소절" },
+    "sting_item_get":     { "bus": "Music",    "loop": false, "priority": "P0", "trigger": "quest item_recovered", "source": "gongu-gugak-sfx", "mood": "상승하는 가야금 뜯기" },
+    "sting_quest_complete": { "bus": "Music",  "loop": false, "priority": "P0", "trigger": "quest completed → 엔딩", "source": "gongu-gugak-bgm", "mood": "해소감, 엔딩 카드까지 이어짐" },
+    "amb_village":        { "bus": "Ambience", "loop": true,  "priority": "P0", "trigger": "마을 영역", "source": "freesound-cc0-by", "mood": "장터 웅성거림(작게) + 새소리 + 먼 개 짖음" },
+    "amb_mountain":       { "bus": "Ambience", "loop": true,  "priority": "P0", "trigger": "산길 영역", "source": "gongu-nature-kogl1", "mood": "바람에 대나무·소나무, 개울, 풀벌레" },
+    "amb_campfire":       { "bus": "Ambience", "loop": true,  "priority": "P1", "trigger": "도적 소굴 모닥불 3D 음원", "source": "freesound-cc0-by", "mood": "장작 타는 소리" },
+    "sfx_footstep_dirt":  { "bus": "SFX",      "loop": false, "priority": "P0", "trigger": "걷기·달리기 애니메이션 발 이벤트(흙)", "source": "kenney-rpg-audio", "variations": 4 },
+    "sfx_footstep_wood":  { "bus": "SFX",      "loop": false, "priority": "P1", "trigger": "발 이벤트(마루·다리)", "source": "kenney-rpg-audio", "variations": 4 },
+    "sfx_sword_swing":    { "bus": "SFX",      "loop": false, "priority": "P0", "trigger": "공격 모션 휘두르는 프레임", "source": "kenney-rpg-audio", "variations": 3 },
+    "sfx_sword_hit":      { "bus": "SFX",      "loop": false, "priority": "P0", "trigger": "적중 프레임 (히트스톱과 동시)", "source": "kenney-impact-sounds", "variations": 3, "note": "타격음 + 저음 쿵 두 겹. 타격감의 절반" },
+    "sfx_enemy_windup":   { "bus": "SFX",      "loop": false, "priority": "P0", "trigger": "도적 attack windup 시작", "source": "kenney-impact-sounds", "note": "칼날 스치는 금속음. 회피 신호" },
+    "sfx_player_hurt":    { "bus": "SFX",      "loop": false, "priority": "P0", "trigger": "플레이어 피격", "source": "kenney-impact-sounds" },
+    "vo_bandit_alert":    { "bus": "Voice",    "loop": false, "priority": "P0", "trigger": "도적 alert 진입", "source": "team-recording", "lines": ["웬 놈이냐!", "거기 서라!"] },
+    "vo_bandit_death":    { "bus": "Voice",    "loop": false, "priority": "P1", "trigger": "도적 dead 진입", "source": "team-recording", "lines": ["크윽…"] },
+    "sfx_chest_open":     { "bus": "SFX",      "loop": false, "priority": "P0", "trigger": "장부 상자 열기", "source": "kenney-rpg-audio" },
+    "sfx_paper":          { "bus": "SFX",      "loop": false, "priority": "P1", "trigger": "장부 획득, 대화창 열림", "source": "freesound-cc0-by" },
+    "sfx_coin":           { "bus": "SFX",      "loop": false, "priority": "P0", "trigger": "보상 지급", "source": "kenney-rpg-audio" },
+    "ui_dialogue_open":   { "bus": "UI",       "loop": false, "priority": "P0", "trigger": "대화창 열림", "source": "kenney-interface-sounds" },
+    "ui_choice_move":     { "bus": "UI",       "loop": false, "priority": "P0", "trigger": "선택지 이동", "source": "kenney-interface-sounds" },
+    "ui_choice_confirm":  { "bus": "UI",       "loop": false, "priority": "P0", "trigger": "선택지 확정", "source": "kenney-interface-sounds" },
+    "ui_text_tick":       { "bus": "UI",       "loop": false, "priority": "P1", "trigger": "타이핑 효과 글자마다(3글자당 1회)", "source": "kenney-interface-sounds" }
+  }
+}

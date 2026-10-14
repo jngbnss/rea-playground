@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0",
+  "description": "아트 디렉션 기준 팔레트. 오방색을 채도 낮춰 쓰고, 한지·먹을 UI의 바탕과 글자로 쓴다. UI 목업 CSS 토큰과 값이 같아야 한다(테스트로 검사).",
+  "colors": {
+    "ink": {
+      "hex": "#1E1A17",
+      "role": "먹. UI 패널 바탕, 가장 어두운 그림자"
+    },
+    "ink_soft": {
+      "hex": "#3A332D",
+      "role": "패널 테두리, 비활성 요소"
+    },
+    "hanji": {
+      "hex": "#F1E7D3",
+      "role": "한지. 어두운 패널 위 글자, 밝은 패널 바탕"
+    },
+    "hanji_shade": {
+      "hex": "#CDBE9F",
+      "role": "보조 글자, 이름표 아래 줄"
+    },
+    "dancheong_red": {
+      "hex": "#A5402F",
+      "role": "적(赤). 체력, 위험, 도적의 천 조각"
+    },
+    "hp_red": {
+      "hex": "#C4553F",
+      "role": "어두운 패널 위 체력 바·피격 표시 전용. dancheong_red는 어두운 바탕에서 대비가 부족하다"
+    },
+    "cheong_blue": {
+      "hex": "#2F5868",
+      "role": "청(靑). 기와 그림자, 먼 산, 저녁 하늘 아래쪽"
+    },
+    "hwangto": {
+      "hex": "#C49A4A",
+      "role": "황(黃). 강조, 퀘스트 마커, 선택된 선택지"
+    },
+    "pine": {
+      "hex": "#3E5838",
+      "role": "소나무 잎, 산길"
+    },
+    "sunset": {
+      "hex": "#E6A25A",
+      "role": "해 질 녘 직사광 색(조명 색으로 사용)"
+    },
+    "fog": {
+      "hex": "#8FA1A8",
+      "role": "원경 안개, 대기 원근"
+    }
+  },
+  "contrast_pairs": [
+    {
+      "fg": "hanji",
+      "bg": "ink",
+      "min": 4.5,
+      "use": "대화 본문"
+    },
+    {
+      "fg": "hanji_shade",
+      "bg": "ink",
+      "min": 4.5,
+      "use": "보조 글자, 선택지 기본"
+    },
+    {
+      "fg": "hwangto",
+      "bg": "ink",
+      "min": 4.5,
+      "use": "NPC 이름, 선택된 선택지"
+    },
+    {
+      "fg": "ink",
+      "bg": "hanji",
+      "min": 4.5,
+      "use": "밝은 패널(퀘스트 두루마리) 본문"
+    },
+    {
+      "fg": "dancheong_red",
+      "bg": "hanji",
+      "min": 4.5,
+      "use": "두루마리 위 강조"
+    },
+    {
+      "fg": "hp_red",
+      "bg": "ink",
+      "min": 3.0,
+      "use": "체력 바(비텍스트 UI)"
+    }
+  ]
+}

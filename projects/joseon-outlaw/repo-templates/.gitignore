@@ -1,0 +1,29 @@
+# Godot 4 캐시와 내보내기 결과
+.godot/
+/build/
+/export/
+*.translation
+
+# .import 와 .uid 파일은 커밋한다 (Godot 4 공식 권장). 여기서 무시하지 않는다.
+
+# 라이선스상 공개 저장소에 둘 수 없는 원본 (docs/14-license-ledger.md)
+assets/_private/
+*.mixamo.fbx
+
+# 로컬 LLM 가중치는 저장소 밖에서 받는다
+ai_server/models/
+
+# Python
+__pycache__/
+.venv/
+*.pyc
+
+# 로그·측정 원본 (요약본만 커밋)
+metrics/raw/
+*.log
+
+# OS·에디터
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
