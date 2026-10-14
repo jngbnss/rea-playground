@@ -22,7 +22,7 @@ export const NEUTRAL_INPUT: VehicleInput = {
 };
 
 /** 1회성 액션. 다음 fixedUpdate 에서 소비된다. [분석확인] */
-export type OneShotAction = 'reset';
+export type OneShotAction = 'reset' | 'toggleBrakeAssist';
 
 export interface InputSource {
   readonly name: string;
@@ -38,6 +38,7 @@ interface KeyBindings {
   readonly right: readonly string[];
   readonly handbrake: readonly string[];
   readonly reset: readonly string[];
+  readonly brakeAssist: readonly string[];
 }
 
 /** 키 바인딩 [분석확인] */
@@ -48,6 +49,7 @@ export const KEY_BINDINGS: KeyBindings = {
   right: ['KeyD', 'ArrowRight'],
   handbrake: ['Space'],
   reset: ['KeyR'],
+  brakeAssist: ['KeyB'], // [분석확인] 원본 안내문 "B 브레이크 보조"
 };
 
 /** 데모가 가로채는 전체 키 코드(브라우저 기본 동작 차단 대상) */
@@ -88,6 +90,10 @@ export class KeyboardSource implements InputSource {
     // 리셋은 오토리핏(e.repeat)을 무시하고 1회만 큐에 넣는다. [분석확인]
     if (KEY_BINDINGS.reset.includes(event.code) && !event.repeat) {
       this.actions.push('reset');
+    }
+    // 브레이크 보조 토글도 같은 1회성 규칙을 따른다. [분석확인]
+    if (KEY_BINDINGS.brakeAssist.includes(event.code) && !event.repeat) {
+      this.actions.push('toggleBrakeAssist');
     }
     this.pressed.add(event.code);
   };

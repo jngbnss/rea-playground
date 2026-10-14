@@ -5,7 +5,8 @@ import type { VehicleInput } from './input';
  * 스타일은 index.html 의 <style> 에 있고, 여기서는 구조 생성과 텍스트 갱신만 한다.
  */
 
-const HELP_TEXT = 'W/↑ 가속 · S/↓ 브레이크·후진 · A/D 조향 · Space 핸드브레이크 · R 리셋';
+const HELP_TEXT =
+  'W/↑ 가속 · S/↓ 브레이크·후진 · A/D 조향 · Space 핸드브레이크 · B 브레이크 보조 · R 리셋';
 
 export class Hud {
   private readonly root: HTMLElement;
@@ -65,6 +66,7 @@ export class Hud {
    * @param sources  활성 입력 소스 이름 (없으면 none)
    * @param frontLocked 앞축 휠 락 [분석확인] 요구제동력 > 그립한계*1.1 && |v| > 2
    * @param rearLocked  뒤축 휠 락
+   * @param brakeAssist 브레이크 보조(B) 상태 [분석확인] 원본 기본 켜짐
    */
   update(
     speedKmh: number,
@@ -72,6 +74,7 @@ export class Hud {
     sources: readonly string[],
     frontLocked: boolean,
     rearLocked: boolean,
+    brakeAssist: boolean,
   ): void {
     const rounded = Math.round(speedKmh); // [분석확인]
     if (rounded !== this.lastSpeed) {
@@ -97,6 +100,7 @@ export class Hud {
     const channels =
       `throttle ${input.throttle.toFixed(2)} · brake ${input.brake.toFixed(2)} · steer ${steer}` +
       (input.handbrake > 0 ? ' · handbrake' : '') +
+      (brakeAssist ? ' · ABS' : '') +
       lock;
     if (channels !== this.lastChannels) {
       this.lastChannels = channels;

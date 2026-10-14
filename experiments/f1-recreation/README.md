@@ -24,10 +24,12 @@ npm run preview  # 빌드 결과 미리보기
 | `W` / `↑` | 가속 (후진 중이면 제동) |
 | `S` / `↓` | 제동 (정지/저속이면 후진) |
 | `A` / `←` · `D` / `→` | 좌/우 조향 |
-| `Space` | 핸드브레이크 (뒤 타이어 그립 0.3배 + 추가 제동) |
+| `Space` | 핸드브레이크 (뒤 타이어 그립 0.3배 + `mass×6 N` 추가 제동) |
+| `B` | 브레이크 보조 토글 (기본 켜짐 — 원본과 동일) |
 | `R` | 리셋 (위치·속도·요·컨트롤러 상태 초기화) |
 
-HUD: 좌상단에 속도(km/h), 활성 입력 소스, throttle/brake/steer 수치, 휠 락 표시(`LOCK F` / `LOCK R` / `LOCK F+R`). 화면 하단에 조작 안내.
+HUD: 좌상단에 속도(km/h), 활성 입력 소스, throttle/brake/steer 수치, 브레이크 보조 상태(`ABS`),
+휠 락 표시(`LOCK F` / `LOCK R` / `LOCK F+R`). 화면 하단에 조작 안내.
 
 ## 2라운드에서 승격된 항목 ([자체설계] → [분석확인])
 
@@ -59,7 +61,7 @@ HUD: 좌상단에 속도(km/h), 활성 입력 소스, throttle/brake/steer 수�
 | 고정 타임스텝 | `fixedDt = 1/60`, `maxSubSteps = 5`, `frame = min(Δt, 0.25)` | `src/loop.ts` |
 | 스파이럴 방지 | 서브스텝이 `maxSubSteps` 에 도달하면 `accumulator = 0` | `src/loop.ts` |
 | 렌더 보간 | `alpha = accumulator / fixedDt`, `lerpVectors(prev, curr, alpha)`, `slerpQuaternions(prevQ, currQ, alpha)` | `src/loop.ts`, `src/main.ts` |
-| 키 바인딩 | `W/↑`, `S/↓`, `A/←`, `D/→`, `Space`, `R` / keydown·keyup·blur, 소유 키 `preventDefault()`, blur 시 전체 해제 | `src/input.ts` |
+| 키 바인딩 | `W/↑`, `S/↓`, `A/←`, `D/→`, `Space`, `B`, `R` / keydown·keyup·blur, 소유 키 `preventDefault()`, blur 시 전체 해제 | `src/input.ts` |
 | 입력 읽기 | `throttle = +pressed`, `brake = +pressed`, `steer = +right - +left`, `handbrake = +pressed` | `src/input.ts` |
 | 1회성 액션 | `R` 은 `e.repeat === false` 일 때만 큐에 push → 다음 fixedUpdate 에서 consume | `src/input.ts`, `src/main.ts` |
 | 입력 합성 | throttle/brake/handbrake 는 `max`, steer 는 절대값이 큰 쪽 | `src/input.ts` |
@@ -77,12 +79,22 @@ HUD: 좌상단에 속도(km/h), 활성 입력 소스, throttle/brake/steer 수�
 | 후진력 | `t = clamp(max(-v,0)/maxReverseSpeed,0,1)`, `F = drive * reverseForce * (1 - t²)` | `src/vehicle.ts` |
 | 구동 상수 | `G = 9.81`, `engineForce = 800*9.81*1.4 = 10,987.2 N`, `brakeForce = 800*9.81*4 = 31,392 N`, `reverseForce = mass*5 = 4,000 N`, `maxReverseSpeed = 12`, `brakeBias = 0.56` | `src/vehicle.ts` |
 | 속도 상한 | `topSpeed = 97.756 m/s (352 km/h)`, `maxSpeed = topSpeed * 1.04 = 101.666 m/s` | `src/vehicle.ts` |
-| 접지/저항 | `normalLoad = mass*G + downforce*v²`, `drag = Cd*v²`, `rolling = Crr*normalLoad`, `downforce = 2.9*0.96 = 2.784`, `Cd = 0.51362`, `Crr = 0.03` | `src/vehicle.ts` |
+| 접지/저항 | `normalLoad = mass*G + downforce*activeAero.downforce*v²`, `drag = Cd*activeAero.drag*v²`, `rolling = Crr*normalLoad`, `downforce = 2.9*0.96 = 2.784`, `Cd = 0.51362`, `Crr = 0.03` | `src/vehicle.ts` |
+| 액티브 에어로 | `open = straightZone && brake < 0.05 && |steerAngle| < 0.03`, `aeroMode = open ? min(1, m + dt/0.5) : max(0, m - dt/0.15)`, `drag ×= 1 + (0.7-1)·m`, `downforce ×= 1 + (0.55-1)·m` | `src/vehicle.ts` |
+| 서스펜션 상수 | `stiffness = mass*56 = 44,800 N/m`, `damping = mass*3.25 = 2,600 N·s/m`, `antiRollFront = mass*120 = 96,000`, `antiRollRear = mass*95 = 76,000 N/m`, `rest = 0.3 m` (F1 전용값이 기본 15/12를 덮어쓴다) | `src/suspension.ts` |
+| 바퀴 하중 | `load = stiffness*압축 + damping*압축속도 + antiRoll*(이쪽 압축 - 반대쪽 압축)`, `load = max(load, 0)` | `src/suspension.ts` |
+| 다운포스 배분 | 앞 `aeroBalance = 0.45`, 뒤 `0.55` — 축 위치에 각각 건다 | `src/suspension.ts` |
 | 정하중 배분 | `staticFront = b/(a+b) = 0.456`, `staticRear = a/(a+b) = 0.544` | `src/vehicle.ts` |
-| 타이어 계수 | `frontFriction = mu = 1.75`, `rearFriction = mu*1.03 = 1.8025`, `grip = [0.9, 0.95]`, 제동 보정 `braking = 1.02` | `src/vehicle.ts` |
-| 기계그립 보정 | `h = 1 + (grip - 1) * (mass*G) / normalLoad` → 다운포스가 붙을수록 1 로 수렴 | `src/vehicle.ts` |
-| 축별 제동 한계 | `축 제동력 = min(요구치, μ_axis · 축하중 · braking)`, 요구치는 `brakeBias` 배분 | `src/vehicle.ts` |
-| 휠 락 | `locked = 요구제동력 > 그립한계 * 1.1 && |v| > 2` | `src/vehicle.ts` |
+| 타이어 계수 | `μ = frontFriction(1.75) / rearFriction(1.8025) × h`, 제동 보정 `braking = 1.02`. `tune.grip [0.9, 0.95]` 는 μ 가 아니라 **횡력 상한 `E`** 에 쓰인다 | `src/vehicle.ts` |
+| 기계그립 보정 | `h = 1 + (mechGrip(0.985) - 1) * (mass*G) / normalLoad` → 다운포스가 붙을수록 1 로 수렴 | `src/vehicle.ts` |
+| 바퀴별 제동 요구치 | `j = brake · brakeForce · brakeForceScale(1.5) · (앞 ? k : 1−k) / 2`, `k = brakeAssist ? clamp(앞하중비, 0.45, 0.75) : brakeBias` | `src/vehicle.ts` |
+| 제동 그립 한계 | `ee = μ · 바퀴하중 · brakeGrip(1.2) · braking(1.02)` | `src/vehicle.ts` |
+| 마찰타원 | `hypot(횡력/w, (구동−제동)/M) > 1` 이면 세 힘을 같은 비율로 축소. `M = 제동 우세면 ee, 아니면 w · traction(0.97)` | `src/vehicle.ts` |
+| 횡력 상한 | `F = min(w · 매직포뮬러(|α|), E)`, `E = |바퀴 좌표계 횡속도| · massPerWheel · 기계그립 / dt` | `src/vehicle.ts` |
+| 휠 락 페널티 | 잠기면 `w ×= 0.8`, 횡력 `×= 0.25`, 제동력 `= ee × 0.8` | `src/vehicle.ts` |
+| 브레이크 보조 | 기본 켜짐. 켜져 있으면 **락이 발생하지 않고** 배분이 하중 비율로 바뀐다 (`B` 키 토글) | `src/vehicle.ts`, `src/input.ts` |
+| 핸드브레이크 추가 제동 | 뒤 두 바퀴에 `handbrakeForce(= mass×6) / 2` 씩 | `src/vehicle.ts` |
+| 휠 락 | `locked = !brakeAssist && 바퀴별 요구제동력 > ee * 1.1 && |v| > 2` (바퀴 단위 판정) | `src/vehicle.ts` |
 | 핸드브레이크 | 뒤 타이어 그립 `× (1 - (1 - 0.3)*handbrake)` (`handbrakeGripFactor = 0.3`) | `src/vehicle.ts` |
 | 타이어 곡선 | 매직포뮬러 `F(s) = sin(1.2*atan(B*s - 0.3*(B*s - atan(B*s))))`, `B = 36` | `src/vehicle.ts` |
 | 체이스 카메라 | `distance 6.8 / height 2.6 / lookHeight 1.1 / lookAhead 3 / rotationDamping 4.5 / baseFov 62 / speedFov 8` | `src/camera.ts` |
@@ -98,15 +110,14 @@ HUD: 좌상단에 속도(km/h), 활성 입력 소스, throttle/brake/steer 수�
 | --- | --- | --- |
 | 횡방향 모델 | 자전거 모델(2륜 등가): `αf = atan2(vy + r·a, |vx|) - δ`, `αr = atan2(vy - r·b, |vx|)`, `Fy = -sign(α)·μ·하중·F(|α|)`, `ṙ = (a·Fyf·cosδ - b·Fyr)/Izz` | 원본은 Rapier 4륜 레이캐스트 서스펜션. 물리 엔진 금지 조건이라 2륜 등가로 근사 / `src/vehicle.ts` |
 | 요 관성모멘트 | `Izz = mass · b = 1,240 kg·m²` | 원본은 Rapier 강체가 형상에서 자동 계산해 값이 드러나지 않음 / `src/vehicle.ts` |
-| 종방향 하중 이동 | `ΔW = mass · ax · cgHeight / wheelBase`, `frontLoad = max(0, staticFront·normalLoad - ΔW)`, `rearLoad = max(0, staticRear·normalLoad + ΔW)` | 표준 1차 하중이동 식. `ax` 는 **직전 스텝의 실측 종가속도**(1/60 s 지연)를 쓴다 — 제동력→하중→제동력 내부 반복이 필요 없고 60 Hz 에서 지연이 16.7 ms 뿐이라 수렴 반복보다 단순하다 / `src/vehicle.ts` |
-| 다운포스 배분 | 다운포스도 정하중과 같은 비율(`staticFront`/`staticRear`)로 축에 나눈다 | 원본의 에어로 밸런스 수치는 확인되지 않음 / `src/vehicle.ts` |
+| 차체 3자유도 | 4륜 서스펜션의 스프링·댐퍼·안티롤바 식은 [분석확인]이지만, 그 힘으로 움직이는 **차체 heave·pitch·roll 적분**은 자체 설계. `m·z̈ = ΣF - mg - D`, `I_θ·θ̈ = ΣF·x + m·ax·h + 에어로 모멘트`, `I_φ·φ̈ = ΣF·y + m·ay·h` (semi-implicit Euler, 4 서브스텝) | 원본은 Rapier 강체가 적분한다. 평지라 레이캐스트 거리가 차체 자세만의 함수여서 레이 발사 없이 같은 입력을 만든다 / `src/suspension.ts` |
+| 피치·롤 관성모멘트 | `I_θ = m·a·b = 2,294`, `I_φ = m·trackHalf² = 512 kg·m²` | 원본은 Rapier가 형상에서 자동 계산 / `src/suspension.ts` |
+| 하중이동 입력 가속도 | 피치는 `longForce/mass`, 롤은 타이어 횡력 `ΣFy/mass` 만 쓴다 (회전 좌표계 항 `yawRate·vy`, `-yawRate·vx` 제외). 직전 스텝 값을 쓰므로 1/60 s 지연 | 속도차로 계산하면 스핀 중 가짜 가속도가 피치를 폭주시킨다 (`docs/errors.md` E-018) / `src/vehicle.ts` |
 | 종방향 적분 | `v̇x = ΣF/mass + r·vy`, 저항·제동은 진행 반대 방향. 제동만으로 역주행하지 않도록 0 에서 고정 | 회전 좌표계 보정 / `src/vehicle.ts` |
-| 구동 접지 한계 | 구동력을 **뒤축** 그립 `μ_rear · rearLoad` 로 클램프 (RWD 는 [분석확인]) | 원본은 구동력을 강체에 직접 거는 방식이라 접지 한계가 없다. 가속 시 하중이 뒤로 실려 한계가 커지는 효과를 살림 / `src/vehicle.ts` |
-| 마찰원 | `scale = sqrt(1 - min(|축별 순 종방향력|/용량, 1)²)`. 구동력은 전부 뒤축, 제동은 축별 값, **구동−제동은 서로 상쇄** | 원본은 4륜에 힘을 나눠 주므로 그 근사. 합산하면 핸드브레이크+가속 시 조향이 사라진다 / `src/vehicle.ts` |
-| 휠 락 페널티 | 잠긴 축의 횡력에 `×0.35` | 판정식은 [분석확인], 잠긴 뒤 횡력이 얼마나 남는지는 미확인 / `src/vehicle.ts` |
-| 핸드브레이크 추가 제동 | 뒤축 요구 제동력에 `mass*G*1.5` 가산 | 원본에서 확인된 것은 그립 0.3배뿐 / `src/vehicle.ts` |
-| 액티브 에어로 | 구현하지 않음 (`drag`/`downforce` 를 `Gn = {0.7, 0.55}` 쪽으로 보간하는 분기 생략) | 발동 조건(직선+무제동+소조향)의 임계값이 확인되지 않음 / `src/vehicle.ts` |
-| 차종 보정 미적용분 | `grip 0.985`, `traction 0.97`, `tyreWear 0.95` 는 적용하지 않음 (`downforce 0.96`·`drag 0.94` 는 확정 수치에 이미 반영, `braking 1.02` 는 제동 그립에 적용) | 적용 지점이 번들에서 확인되지 않음. 타이어 마모 모델도 없음 / `src/vehicle.ts` |
+| 마찰타원 적용 시점 | 원본은 그 스텝의 횡력 `D` 로 `hypot(D/w, re/M)` 을 계산하지만, 데모는 횡력을 서브스텝 루프에서 나중에 구하므로 **직전 스텝의 축 횡력**을 바퀴당으로 나눠 쓴다 (1/60 s 지연) | 식 자체는 [분석확인], 지연만 자체 설계 / `src/vehicle.ts` |
+| 횡력 상한 축 환산 | 원본은 바퀴 단위 `massPerWheel`, 데모는 자전거 모델이라 축 단위 `mass/2` 로 환산 | 2륜 등가 모델의 귀결 / `src/vehicle.ts` |
+| 액티브 에어로 직선 판정 | 원본 `straightZone`(트랙 중심선 곡률 사전계산 배열) 대신 `|yawRate| < 0.05 rad/s` 로 대체 | 데모에는 트랙 스플라인·중심선 인덱스가 없다. 나머지 조건(`brake < 0.05`, `|steer| < 0.03 rad`)과 램프(0.5 s / 0.15 s), 배수(`×0.7` / `×0.55`)는 전부 [분석확인] / `src/vehicle.ts` |
+| 차종 보정 미적용분 | `tyreWear 0.95` 와 타이어 마모·노면 그립(`surfaceGrip`)은 적용하지 않음 (`grip 0.985` → `mechGrip`, `traction 0.97` → 마찰타원 `M`, `braking 1.02` → 제동 그립, `downforce 0.96`·`drag 0.94` → 확정 수치에 반영) | 마모·노면 모델 자체가 없다. 라운드 5 제동 격차의 남은 후보 / `src/vehicle.ts` |
 | 속도 리미터 기준 | `speedCap = topSpeed` | 원본 `speedCap` 은 세션별 가변값이라 기본값이 불명 / `src/vehicle.ts` |
 | 수치 안정화 | 횡방향 8 서브스텝, 슬립각 분모 하한 3 m/s, `|vx| 1~8 m/s` 구간은 운동학 모델(`r = vx·tanδ/L`, `vy = r·b`)과 블렌딩, 후진은 운동학 100% | 타이어 강성(B=36)이 커서 1/60 단일 스텝으로는 발산 / `src/vehicle.ts` |
 | 조향 부호 | 입력 `steer` 는 +가 우측, 월드 `yaw` 는 +가 좌측이라 물리에 넣을 때 부호 반전 | three.js 좌표 규약 / `src/vehicle.ts` |
@@ -130,7 +141,8 @@ src/
   loop.ts        고정 타임스텝 루프 (누산기 + 보간 alpha)
   input.ts       KeyboardSource + InputHub (입력 합성, 1회성 액션 큐)
   controller.ts  VehicleController (입력 → 구동/제동/조향각 명령)
-  vehicle.ts     차량 상태 · 종방향/횡방향 적분 · 타이어 매직포뮬러
+  vehicle.ts     차량 상태 · 종방향/횡방향 적분 · 타이어 매직포뮬러 · 액티브 에어로
+  suspension.ts  4륜 서스펜션 (차체 heave/pitch/roll → 바퀴별 수직 하중)
   camera.ts      ChaseCamera (요/높이/FOV 지수 댐핑)
   hud.ts         순수 DOM HUD
   scene.ts       three.js 씬 · 지면 · 타원 트랙 · 박스 차량
@@ -143,22 +155,30 @@ src/
 ```js
 __demo.vehicle.speedKmh              // 현재 속도 (km/h)
 __demo.vehicle.forwardSpeed          // 전방 속도 (m/s)
-__demo.vehicle.longAccel             // 종가속도 (m/s²) — 하중 이동 입력값
-__demo.vehicle.frontLocked           // 앞축 휠 락 여부
-__demo.vehicle.rearLocked            // 뒤축 휠 락 여부
+__demo.vehicle.longAccel             // 종가속도 (m/s²) — 피치 하중이동 입력값
+__demo.vehicle.lateralAccel          // 타이어 횡가속도 (m/s²) — 롤 하중이동 입력값
+__demo.vehicle.aeroMode              // 액티브 에어로 전개율 (0~1)
+__demo.vehicle.suspension.loads      // 바퀴별 수직 하중 [FL, FR, RL, RR] (N)
+__demo.vehicle.suspension.pitch      // 차체 피치 (rad, + 노즈업)
+__demo.vehicle.suspension.roll       // 차체 롤 (rad, + 좌측 위)
+__demo.vehicle.wheelLocked           // 바퀴별 락 여부 [FL, FR, RL, RR]
+__demo.vehicle.frontLocked           // 앞축 휠 락 여부 (앞 두 바퀴 OR)
+__demo.vehicle.rearLocked            // 뒤축 휠 락 여부 (뒤 두 바퀴 OR)
 __demo.vehicle.availablePower(v)     // ERS 테이퍼가 적용된 가용 파워 (W)
 __demo.vehicle.position              // 월드 위치
 __demo.loop.totalSteps               // 누적 물리 스텝 수
+__demo.vehicle.brakeAssist           // 브레이크 보조 상태 (B 키, 기본 true)
 __demo.reset()                       // R 키와 동일
 ```
 
 ## 알려진 한계
 
-- 서스펜션/피치·롤, 횡방향 하중 이동, 휠스핀(슬립률), 기어·RPM, 랩타임은 구현하지 않았습니다.
-  종방향 하중 이동과 휠 락은 2라운드에서 구현했습니다.
-- 액티브 에어로(직선에서 `drag`/`downforce` 를 낮추는 분기)를 구현하지 않아,
-  확정된 `topSpeed 352 km/h` 보다 낮은 **약 329 km/h** 에서 속도가 수렴합니다
-  (ERS 테이퍼로 290 km/h 이상에서 파워가 줄어드는 반면 항력은 그대로이기 때문).
+- 휠스핀(슬립률), 기어·RPM, 랩타임, 타이어 마모(`tyres.grip`), 노면별 그립(`surfaceGrip`),
+  하중 민감도(`x *= 1 - 0.08*(load/avgLoad - 1)`)는 구현하지 않았습니다.
+  종방향 하중 이동과 휠 락은 2라운드, **4륜 서스펜션·액티브 에어로는 4라운드**,
+  **브레이크 보조와 바퀴별 힘 해석(마찰타원·횡력 상한)은 5라운드**에 구현했습니다.
+- 제동은 이제 원본보다 **빠릅니다**: 186 km/h → 정지가 보조 ON 에서 1.94 s (원본 2.10 s, −7.6 %),
+  보조 OFF 에서 2.35 s. 남은 차이의 후보는 위에서 1 로 둔 `surfaceGrip`·타이어 마모 계수입니다.
+- 액티브 에어로의 직선 판정은 원본처럼 트랙 곡률 구간 배열이 아니라 요레이트 임계(`< 0.05 rad/s`)입니다.
+  전력 가속 시 **약 347 km/h** 에서 수렴합니다 (이론값 348.5, 원본 코드 유도값 352 km/h).
 - 지면은 완전한 평지이며 트랙 이탈 판정(그립 저하)이 없습니다. 커브 블록은 시각 참조물입니다.
-- 브레이크 보조(원본 `B` 키)가 없어 전제동 시 양축이 쉽게 잠깁니다
-  (`brakeForce = 4 g` 요구 > 타이어 그립 한계).

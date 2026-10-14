@@ -506,3 +506,137 @@ WASM 내부는 여전히 **[미확인]**이지만, JS가 WASM에 무엇을 요�
 → 차량 물리의 실체는 **"JS가 매 고정 스텝마다 바퀴 4개 위치에 충격량을 꽂아 넣고,
 Rapier는 그 결과를 적분만 한다"** 는 구조다. 타이어 모델·서스펜션·구동력은 전부 JS에 있다.
 이것이 1라운드에서 JS만 읽고도 조작 로직을 복원할 수 있었던 이유다.
+
+## 11. 액티브 에어로 **[사실]** (라운드 4에 확정)
+
+라운드 1–3에서는 발동 조건을 **[미확인]** 으로 남겼는데, 보존한 번들을 다시 읽어 확정했다.
+
+상수 **[사실]** `Game-CGRrnhwj.js @ 4,540,186`: `Rc = .5, zc = .5, Bc = .15, Vc = .03`
+
+```js
+// 호출: fixedUpdate 안에서 physics.step 직전 [사실] @ 4,541,453
+this.updateActiveAero(n.brake, n.steerAngle, t);
+
+updateActiveAero(brake, steerAngle, dt) {            // [사실] @ 4,541,495
+  const r = this.config.activeAero;                  // f1 = { drag: .7, downforce: .55 }
+  if (!r) return;                                    // 액티브 에어로 없는 차종은 분기 전체가 꺼진다
+  const open = this.straightZone && brake < .05 && Math.abs(steerAngle) < Vc;   // Vc = 0.03 rad
+  this.aeroMode = open ? Math.min(1, this.aeroMode + dt / zc)    // 열림 램프 0.5 s
+                       : Math.max(0, this.aeroMode - dt / Bc);   // 닫힘 램프 0.15 s
+  this.physics.activeAero.drag      = 1 + (r.drag - 1)      * this.aeroMode;   // 1 → 0.70
+  this.physics.activeAero.downforce = 1 + (r.downforce - 1) * this.aeroMode;   // 1 → 0.55
+}
+```
+
+적용 지점 **[사실]** `@ 4,537,523 / 4,537,750`:
+
+```js
+// 항력 — 차체 항력(손상)·슬립스트림·액티브 에어로가 모두 곱해진다
+drag = -dragCoefficient * wake.drag * bodyDrag * activeAero.drag * speed * dt;
+// 다운포스 — 앞/뒤 바퀴 위치에 aeroBalance 비율로 나눠 충격량을 건다
+down = downforce * activeAero.downforce * speed * speed * dt;
+for (side of ['front', 'rear'])
+  i = side === 'front' ? aeroBalance : 1 - aeroBalance;      // [사실] @ index 38,825
+```
+
+- `straightZone`은 입력이 아니라 **트랙 중심선 곡률로 미리 계산한 구간 배열**이다 **[사실]** `@ 4,565,795`:
+  `r.straightZone = zones[centerline.nearestIndex(r.position)] === 1`. 곡률이 임계 이하인 인덱스를
+  1로 칠하고, 진입/탈출 여유 구간을 깎아 낸다.
+- `aeroBalance` **[사실]**: `activeAero ? 0.45 : 0.5 - cgZ / wheelBase` → F1은 **0.45**.
+- `bodyDrag`(손상)·`wake.drag`(슬립스트림)는 단독 주행·무손상 상태에서 1이다 **[사실]**.
+  참고로 `@ 4,539,824`의 `aero()`/`drag()`는 **손상 모델**이지 액티브 에어로가 아니다.
+
+### 11-1. 이 조건이 `topSpeed 352 km/h`의 근거다
+
+9-4절의 이분탐색이 어떤 공력 상태를 가정했는지 역으로 풀면 다음과 같다
+(힘 평형 `min(engineForce, P(v)/v) / launchDiv = Cd·v² + Crr·(mg + Cl·v²)`, ERS 테이퍼 포함).
+
+| 가정 | 수렴 속도 |
+| --- | ---: |
+| 닫힘(`activeAero` 미적용), 구름저항 포함, launchDiv 1.07 | 329.0 km/h |
+| **열림(×0.7 / ×0.55), 구름저항 포함, launchDiv 없음** | **351.9 km/h** |
+| 열림, 구름저항 없음, launchDiv 없음 | 369.0 km/h |
+
+→ 번들이 푼 **352 km/h**는 **"액티브 에어로가 열린 직선 + 구름저항 포함 + 발진완화 제외"** 상태다 **[추정]**
+(식의 각 항은 [사실]이고, 조합의 선택이 일치한다는 판단이 [추정]).
+라운드 3 데모가 약 329 km/h에서 수렴한 것은 정확히 첫 줄의 조건이었다 — 액티브 에어로 미구현 때문이다.
+
+## 12. 서스펜션 설정값 **[사실]** `index-CZ5aQSby.js @ 36,422 / 38,348`
+
+```js
+f1: { mu: 1.75, downforce: 2.9, wheelRadius: .36, halfY: .2, wheelY: 0, rest: .3,
+      springPerKg: 56, damperPerKg: 3.25, grip: [.9, .95], steer: [.5, .07, 70],
+      cgHeight: .33, antiRollPerKg: [120, 95] }
+
+suspensionRestLength = rest;                        // 0.3 m
+suspensionStiffness  = mass * springPerKg;          // 800 × 56   = 44,800 N/m
+suspensionDamping    = mass * damperPerKg;          // 800 × 3.25 = 2,600 N·s/m
+antiRollFront        = mass * (antiRollPerKg[0] ?? 15);   // 800 × 120 = 96,000 N/m
+antiRollRear         = mass * (antiRollPerKg[1] ?? 12);   // 800 ×  95 = 76,000 N/m
+```
+
+→ 5절의 기본값 `mass × 15 / mass × 12`는 **F1에는 적용되지 않는다**. F1 전용
+`antiRollPerKg [120, 95]`가 덮어쓰므로 롤 강성이 기본 차량의 8배다.
+
+파생 수치(확정값으로 계산):
+
+| 항목 | 값 | 비고 |
+| --- | ---: | --- |
+| 코너당 정적 압축량 | 0.0438 m | `mg/4 / 44,800` — 자유장 0.3 m 대비 여유 |
+| 코너 고유진동수 / 감쇠비 | 2.38 Hz / 0.434 | `√(k/m_corner)`, `c/(2√(k·m_corner))` |
+| 352 km/h 압축량 | 0.192 m | 다운포스 포함 — 바닥에 닿지 않는다 |
+
+## 13. 바퀴별 힘 해석 전체 **[사실]** (라운드 5에 확정) `Game @ 4,536,353–4,537,100`
+
+4절·5절에서 조각으로 읽었던 식이 실제로는 **바퀴 하나당 한 블록**으로 모여 있다. 전문:
+
+```js
+// 기계그립 b, 마찰계수 x  (d = 노면 그립, _ = 타이어 마모 계수, h = 아래 참조)
+b = (steerable ? frontGrip : rearGrip) * min(1, .35 + .65*d) * min(1, _);
+x = (steerable ? frontFriction*frontGripScale : rearFriction) * d * _ * h;
+if (handbrake wheel && input.handbrake > 0) { t = 1-(1-handbrakeGripFactor)*handbrake; b *= t; x *= t; }
+x *= 1 - .08*(min(load/avgLoad, 2.5) - 1);        // 하중 민감도(과하중 패널티)
+w  = x * load;                                     // 이 바퀴가 낼 수 있는 힘
+T  = atan2(lateralSlip, max(|forwardSpeed|, 1.5)); // 슬립각
+E  = |lateralSlip| * massPerWheel * b / dt;        // 횡속도 소거 상한
+D  = -sign(lateralSlip) * min(w * magicFormula(|T|), E);     // 실제 횡력
+O  = driven ? drive/drivenCount : 0;               // 바퀴당 구동력
+k  = brakeAssist ? v : brakeBias;                  // v = clamp(앞하중/전체하중, .45, .75)
+j  = brake * brakeForce * brakeForceScale(1.5) * (steerable ? k : 1-k) / (wheels.length/2);
+ee = w * brakeGrip(1.2) * (braking ?? 1);          // 제동 그립 한계
+locked = !brakeAssist && j > ee*1.1 && |forwardSpeed| > 2;
+if (locked) { slip = ±min(hypot(lat, lon*.4), 12); w *= .8; D *= .25; j = ee*.8; }
+if (handbrake wheel) j += handbrake * handbrakeForce / 2;    // handbrakeForce = mass*6
+re = O - j*sign(forwardSpeed || 1);
+M  = j > O ? ee : w * (traction ?? 1);
+if (hypot(D/w, re/M) > 1) { s = 1/hypot(...); D *= s; O *= s; j *= s; }   // 마찰타원
+N  = O*dt;  ae = (j + rollingResistance*load)*dt;
+if (ae > 0 && forwardSpeed !== 0) N -= sign(forwardSpeed) * min(ae, |forwardSpeed|*massPerWheel);
+impulse = lateralDir*D*dt + forwardDir*N;          // 바퀴 위치에 적용
+```
+
+기본값 **[사실]** `@ 4,531,570`:
+`brakeAssist = true`, `brakeGrip = 1.2`, `brakeForceScale = 1.5`, `frontGripScale = 1`,
+`steerPriority = 0`, `tractionControl = 0`, `stability = 0`, `surfaceGrip = 1`, `speedCap = Infinity`.
+
+그리고 `h`는 **차종보정 `grip`(mechGrip)** 로 계산된다 **[사실]** `@ 4,533,253`:
+
+```js
+h = 1 + ((mechGrip ?? 1) - 1) * (mass*9.81 / (mass*9.81 + downforce*speed²));
+```
+
+→ 라운드 2–4에서 `h`에 `tune.grip[0.9, 0.95]`를 넣었던 것은 **오독**이었다.
+`grip[]`은 μ가 아니라 **횡속도 소거 상한 `E`** 에 쓰이고, `h`에 들어가는 것은 차종보정 `grip = 0.985`다.
+
+### 13-1. 라운드 5에 [자체설계] → [사실]로 바뀐 값
+
+| 항목 | 라운드 4까지 | 라운드 5 확정 |
+| --- | --- | --- |
+| 잠긴 바퀴 횡력 | `×0.35` (추정) | **`×0.25`** + 그립 용량 `×0.8`, 제동력 `= ee×0.8` |
+| 핸드브레이크 추가 제동 | `mass×9.81×1.5` (추정) | **`handbrakeForce = mass×6 = 4,800 N`**, 뒤 두 바퀴에 절반씩 |
+| 마찰원 | `sqrt(1-(종/용량)²)` (추정) | **마찰타원 정규화** `hypot(D/w, re/M) > 1 → 모두 1/hypot 배` |
+| 제동 요구치 | `brakeForce × bias` | **`× brakeForceScale 1.5`** |
+| 제동 그립 한계 | `μ·load·braking` | **`μ·load·brakeGrip(1.2)·braking`** |
+| 제동 배분 | 항상 `brakeBias 0.56` | **brakeAssist(기본 ON) 이면 `clamp(앞하중비, 0.45, 0.75)`** |
+| μ의 기계그립 항 | `tune.grip` 사용(오독) | **차종보정 `mechGrip 0.985`**, `tune.grip`은 `E` 항으로 이동 |
+| 구동 접지 한계 | 뒤축 μ·하중 클램프(자체) | **`M = w × traction(0.97)`** 로 마찰타원 안에서 처리 |

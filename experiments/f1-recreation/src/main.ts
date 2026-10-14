@@ -49,6 +49,8 @@ const loop = new FixedStepLoop({
     // 1회성 액션(R 리셋)은 물리 스텝 시작 시 소비한다. [분석확인]
     for (const action of input.consumeActions()) {
       if (action === 'reset') reset();
+      // 브레이크 보조 토글 — 원본은 기본 켜짐 [분석확인]
+      else if (action === 'toggleBrakeAssist') vehicle.brakeAssist = !vehicle.brakeAssist;
     }
     const sample = input.sample();
     lastInput = sample;
@@ -70,6 +72,7 @@ const loop = new FixedStepLoop({
       input.activeSources,
       vehicle.frontLocked,
       vehicle.rearLocked,
+      vehicle.brakeAssist,
     );
   },
 
