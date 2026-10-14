@@ -1,5 +1,10 @@
 # REA Playground
 
+> **현재 프로젝트:** [JOSEON OUTLAW](projects/joseon-outlaw/)
+>
+> [![JOSEON OUTLAW CI](https://github.com/jngbnss/rea-playground/actions/workflows/joseon-outlaw.yml/badge.svg)](https://github.com/jngbnss/rea-playground/actions/workflows/joseon-outlaw.yml)
+> [UI 목업 보기](https://jngbnss.github.io/rea-playground/)
+
 [REA(Reverse Engineer Anything)](https://rea.tools/)를 실제로 사용해 **이미 배포된 프로그램의
 동작 원리를 증거 기반으로 분석**하고, 그 원리를 바탕으로 기능을 **직접 다시 구현**하는 실험 저장소.
 

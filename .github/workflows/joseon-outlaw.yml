@@ -1,0 +1,60 @@
+name: JOSEON OUTLAW CI and Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/joseon-outlaw.yml"
+      - "projects/joseon-outlaw/**"
+  pull_request:
+    paths:
+      - ".github/workflows/joseon-outlaw.yml"
+      - "projects/joseon-outlaw/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    name: Smoke tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/joseon-outlaw
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Run project checks
+        run: python run_smoke.py
+
+  deploy:
+    name: Deploy UI mockup
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: smoke
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload UI mockup
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: projects/joseon-outlaw/ui-mockup
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
