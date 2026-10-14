@@ -4,6 +4,20 @@
 
 **모두 초안이다.** 스타일, 에셋, 모델처럼 결정이 필요한 항목은 후보와 권장안을 제시했을 뿐이고, 확정은 팀이 1주차에 한다.
 
+## 자동 검사와 미리보기
+
+- [GitHub Actions](https://github.com/jngbnss/rea-playground/actions/workflows/joseon-outlaw.yml): PR과 `main` 변경 시 스모크 테스트 실행
+- [UI 목업](https://jngbnss.github.io/rea-playground/): `main` 검사 통과 후 GitHub Pages에 배포
+
+## 다음 작업
+
+1. 팀원 경험과 시연 PC 사양을 기록한다.
+2. Godot 4.7.2 프로젝트를 만들고 Windows 내보내기를 검증한다.
+3. 3인칭 이동·카메라와 회색박스 마을·산길을 구현한다.
+4. 고정 대사 기반 NPC 상호작용과 장부 회수 퀘스트를 연결한다.
+5. 검 전투와 적 FSM을 붙여 AI 없이 처음부터 끝까지 완주한다.
+6. FastAPI와 로컬 LLM을 연결하고 실패 시 고정 대사 fallback을 검증한다.
+
 ## 항목별 산출물
 
 | # | 항목 | 문서 | 데이터·도구 | 검사 |
