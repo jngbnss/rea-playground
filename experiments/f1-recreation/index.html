@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>F1 재현 데모 · REA 분석 기반</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --hud-fg: #f2f6ff;
+        --hud-dim: #9fb0c9;
+        --hud-accent: #ff4b4b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #05070d;
+        font-family: 'Pretendard', 'Malgun Gothic', 'Segoe UI', system-ui, sans-serif;
+      }
+
+      #app {
+        position: fixed;
+        inset: 0;
+      }
+
+      #app canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* HUD 는 순수 DOM. 포인터 이벤트를 먹지 않도록 전부 통과시킨다. */
+      .hud {
+        position: fixed;
+        pointer-events: none;
+        user-select: none;
+        color: var(--hud-fg);
+        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.75);
+      }
+
+      .hud-panel {
+        top: 20px;
+        left: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .hud-speed {
+        font-size: 15px;
+        letter-spacing: 0.04em;
+        color: var(--hud-dim);
+      }
+
+      .hud-speed-value {
+        font-size: 46px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        line-height: 1;
+        color: var(--hud-fg);
+        margin: 0 8px 0 0;
+      }
+
+      .hud-speed-unit {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--hud-accent);
+      }
+
+      .hud-source {
+        font-size: 14px;
+        color: var(--hud-dim);
+      }
+
+      .hud-channels {
+        font-size: 13px;
+        font-variant-numeric: tabular-nums;
+        color: var(--hud-dim);
+        white-space: pre;
+      }
+
+      .hud-help {
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 13.5px;
+        letter-spacing: 0.02em;
+        color: var(--hud-dim);
+        background: rgba(5, 7, 13, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 999px;
+        padding: 8px 18px;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

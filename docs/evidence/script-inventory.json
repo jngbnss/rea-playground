@@ -1,0 +1,69 @@
+{
+  "captured_from": "https://jngbnss.github.io/f1/",
+  "tool": "rea inspect-web-page --include-script-sources",
+  "scripts": [
+    {
+      "url": "https://jngbnss.github.io/f1/assets/Game-CGRrnhwj.js",
+      "bytes": 4786193,
+      "is_module": true,
+      "source_map_url": null,
+      "sha256": "1de699278cf8f8dadf6ab473a87b523aa5a7308b311a6b24825f5ce0b10e6721"
+    },
+    {
+      "url": "https://jngbnss.github.io/f1/assets/cars-3LgIUEBS.js",
+      "bytes": 8975,
+      "is_module": true,
+      "source_map_url": null,
+      "sha256": "b735531877200c716b3ab159ae38050ad9c61f432d9813ad0d3cc4661f6d8ddf"
+    },
+    {
+      "url": "https://jngbnss.github.io/f1/assets/Monaco_landmarks-CVcCt41_.js",
+      "bytes": 18597,
+      "is_module": true,
+      "source_map_url": null,
+      "sha256": "1184c9db25b5db1a4fb1d13ae4ccd495dc8e5cc77625eeebf3c6629234a523fe"
+    },
+    {
+      "url": "https://jngbnss.github.io/f1/assets/three.module-mgjLJR3U.js",
+      "bytes": 352360,
+      "is_module": true,
+      "source_map_url": null,
+      "sha256": "750d832bcbecdaba9530d6d008dec743f547add371efefb3b785753e16546599"
+    },
+    {
+      "url": "https://jngbnss.github.io/f1/assets/Monza_landmarks-BvqtwGKc.js",
+      "bytes": 6353,
+      "is_module": true,
+      "source_map_url": null,
+      "sha256": "e48deed9d08beb4322825c5df9b1c3cc4f67a852ddab164c0567f3cb61cab22c"
+    },
+    {
+      "url": "https://jngbnss.github.io/f1/assets/RaceManager-Cv7zsmMd.js",
+      "bytes": 1630,
+      "is_module": true,
+      "source_map_url": null,
+      "sha256": "6968e250e2780bbed12524e69513b4dab4b62b3aad52bcafaed2eeb261ab355a"
+    },
+    {
+      "url": "https://jngbnss.github.io/f1/assets/index-CZ5aQSby.js",
+      "bytes": 505104,
+      "is_module": true,
+      "source_map_url": null,
+      "sha256": "01f6873977d93ea5ffbcf59462cb70ece9755229b1a8c74c3d5fd2732005273f"
+    },
+    {
+      "url": "https://jngbnss.github.io/f1/assets/rolldown-runtime-hePW80VL.js",
+      "bytes": 716,
+      "is_module": true,
+      "source_map_url": null,
+      "sha256": "580ad8c58061a4dde99bde0a56905e382f0568516ee2f5b84dbfb52085709021"
+    },
+    {
+      "url": "https://jngbnss.github.io/f1/assets/three.core-ChCFGFa7.js",
+      "bytes": 263214,
+      "is_module": true,
+      "source_map_url": null,
+      "sha256": "6c5321b79572d05082a3ff4872acfb88a446811e5171968ca6b5c5a934eee9d3"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+# 의존성
+node_modules/
+.pnpm-store/
+
+# 빌드 산출물
+dist/
+build/
+*.tsbuildinfo
+
+# 분석 작업용 임시 디렉터리 (대용량 Evidence 원본, 브라우저 프로필, 추출 번들)
+.tmp/
+
+# 로컬 환경
+.env
+.env.*
+*.local
+
+# 비밀값
+*.pem
+*.key
+secrets.json
+
+# OS / 에디터
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 로그
+*.log
+npm-debug.log*

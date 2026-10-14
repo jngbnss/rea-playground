@@ -1,0 +1,40 @@
+{
+  "note": "대용량 원본 Evidence는 커밋하지 않고 .tmp/evidence/ 에 보관. scripts/ 재현 스크립트로 동일 파일 재생성 가능.",
+  "files": {
+    "inspect-web-page.json": {
+      "sha256": "c4ec9b23f60b3ff6b91d670b35f706151253c1d1651cd44bf60c3683cda2a23b",
+      "bytes": 6171706
+    },
+    "app-graph.json": {
+      "sha256": "2c1db15128a3481bc5e6afb2e71ac29f1c8e3999567eaac3876b916fcb831a92",
+      "bytes": 54156269
+    },
+    "observe-web-execution-throttle.json": {
+      "sha256": "a7a6080d498786c067f449393a8c57a24d362d4b1c100816adaeccfa714d7108",
+      "bytes": 10934504
+    },
+    "listeners-canvas.json": {
+      "sha256": "9bfc41d3920f3d08c58c0cf2be413ed389f47f436c886a8abfb634e322bc7de5",
+      "bytes": 879438
+    },
+    "screenshot-original.json": {
+      "sha256": "1994fb4387260e1e1e2163c48c5727ce80ce1e38831c9a5dc598b4f43409ff4f",
+      "bytes": 1116352
+    },
+    "doctor-codex.json": {
+      "sha256": "00375ccf5436833239db31240711b83ff139bc608dfe611166ad79366b81628b",
+      "bytes": 65330,
+      "committed": true
+    },
+    "listeners-body.json": {
+      "sha256": "e718038485f832ab7ddf227473848c01db1ab47c06454846e65da4f834787d24",
+      "bytes": 3380,
+      "committed": true
+    },
+    "original-game.png": {
+      "sha256": "99343cc3366a86f456248534bff6a12315129c7a9d93068842955513115b233b",
+      "bytes": 835548,
+      "committed": true
+    }
+  }
+}

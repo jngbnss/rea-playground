@@ -1,0 +1,371 @@
+{
+  "tool": "rea observe-web-execution --observation-ms 9000",
+  "window": {
+    "armed_at": "2026-10-14T07:43:56.229Z",
+    "ended_at": "2026-10-14T07:44:05.232Z",
+    "requested_ms": 9000,
+    "end_reason": "window_elapsed",
+    "producer_started_seconds": 6366.925709,
+    "producer_sampled_seconds": 6375.995531
+  },
+  "script": "assets/Game-CGRrnhwj.js",
+  "offset_units": "utf16-code-units",
+  "groups": {
+    "input": [
+      {
+        "name": "read",
+        "start": 8972,
+        "end": 9313,
+        "counts": [
+          544
+        ]
+      },
+      {
+        "name": "consumeActions",
+        "start": 9313,
+        "end": 9374,
+        "counts": [
+          32
+        ]
+      },
+      {
+        "name": "activePad",
+        "start": 9385,
+        "end": 9553,
+        "counts": [
+          9
+        ]
+      },
+      {
+        "name": "poll",
+        "start": 9823,
+        "end": 10256,
+        "counts": [
+          174
+        ]
+      },
+      {
+        "name": "read",
+        "start": 10719,
+        "end": 10869,
+        "counts": [
+          219
+        ]
+      },
+      {
+        "name": "e",
+        "start": 10766,
+        "end": 10799,
+        "counts": [
+          805
+        ]
+      },
+      {
+        "name": null,
+        "start": 10779,
+        "end": 10798,
+        "counts": [
+          1288
+        ]
+      },
+      {
+        "name": "consumeActions",
+        "start": 10869,
+        "end": 10930,
+        "counts": [
+          32
+        ]
+      },
+      {
+        "name": "onKeyDown",
+        "start": 11114,
+        "end": 11296,
+        "counts": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "update",
+        "start": 11784,
+        "end": 12210,
+        "counts": [
+          289
+        ]
+      }
+    ],
+    "controller": [
+      {
+        "name": "update",
+        "start": 4529010,
+        "end": 4529682,
+        "counts": [
+          821
+        ]
+      },
+      {
+        "name": "shift",
+        "start": 4529682,
+        "end": 4529763,
+        "counts": [
+          86
+        ]
+      },
+      {
+        "name": "update",
+        "start": 4529964,
+        "end": 4530663,
+        "counts": [
+          1113
+        ]
+      },
+      {
+        "name": "maxSteer",
+        "start": 4530663,
+        "end": 4530859,
+        "counts": [
+          39
+        ]
+      },
+      {
+        "name": "yc",
+        "start": 4531116,
+        "end": 4531195,
+        "counts": [
+          60
+        ]
+      }
+    ],
+    "physics": [
+      {
+        "name": "get speed",
+        "start": 4533005,
+        "end": 4533073,
+        "counts": [
+          433
+        ]
+      },
+      {
+        "name": "get maxSlip",
+        "start": 4533073,
+        "end": 4533174,
+        "counts": [
+          138
+        ]
+      },
+      {
+        "name": "get groundedWheels",
+        "start": 4533174,
+        "end": 4533253,
+        "counts": [
+          20
+        ]
+      },
+      {
+        "name": "step",
+        "start": 4533253,
+        "end": 4538675,
+        "counts": [
+          1018
+        ]
+      },
+      {
+        "name": null,
+        "start": 4534074,
+        "end": 4534127,
+        "counts": [
+          2216
+        ]
+      },
+      {
+        "name": "getPose",
+        "start": 4538914,
+        "end": 4539022,
+        "counts": [
+          406
+        ]
+      },
+      {
+        "name": "get any",
+        "start": 4539414,
+        "end": 4539477,
+        "counts": [
+          32
+        ]
+      },
+      {
+        "name": "aero",
+        "start": 4539824,
+        "end": 4539923,
+        "counts": [
+          33
+        ]
+      },
+      {
+        "name": "drag",
+        "start": 4539923,
+        "end": 4539983,
+        "counts": [
+          33
+        ]
+      },
+      {
+        "name": "get object3D",
+        "start": 4540483,
+        "end": 4540522,
+        "counts": [
+          419
+        ]
+      },
+      {
+        "name": "get speedKmh",
+        "start": 4540522,
+        "end": 4540574,
+        "counts": [
+          138
+        ]
+      },
+      {
+        "name": "get position",
+        "start": 4540574,
+        "end": 4540609,
+        "counts": [
+          456
+        ]
+      },
+      {
+        "name": "get quaternion",
+        "start": 4540609,
+        "end": 4540647,
+        "counts": [
+          453
+        ]
+      },
+      {
+        "name": "fixedUpdate",
+        "start": 4540647,
+        "end": 4541453,
+        "counts": [
+          260
+        ]
+      },
+      {
+        "name": "updateActiveAero",
+        "start": 4541453,
+        "end": 4541766,
+        "counts": [
+          406
+        ]
+      },
+      {
+        "name": "snapshot",
+        "start": 4541766,
+        "end": 4541892,
+        "counts": [
+          420
+        ]
+      },
+      {
+        "name": "render",
+        "start": 4541892,
+        "end": 4542158,
+        "counts": [
+          419
+        ]
+      },
+      {
+        "name": "isFlipped",
+        "start": 4542359,
+        "end": 4542423,
+        "counts": [
+          419
+        ]
+      }
+    ],
+    "loop": [
+      {
+        "name": "tick",
+        "start": 4735790,
+        "end": 4736203,
+        "counts": [
+          21
+        ]
+      }
+    ],
+    "camera": [
+      {
+        "name": "an",
+        "start": 2005,
+        "end": 2059,
+        "counts": [
+          32
+        ]
+      },
+      {
+        "name": "ln",
+        "start": 2318,
+        "end": 2341,
+        "counts": [
+          32
+        ]
+      },
+      {
+        "name": "un",
+        "start": 2342,
+        "end": 2445,
+        "counts": [
+          32
+        ]
+      },
+      {
+        "name": "setRoughness",
+        "start": 3070,
+        "end": 3103,
+        "counts": [
+          32
+        ]
+      },
+      {
+        "name": "setShot",
+        "start": 3715,
+        "end": 3841,
+        "counts": [
+          289
+        ]
+      },
+      {
+        "name": "update",
+        "start": 3841,
+        "end": 4266,
+        "counts": [
+          34
+        ]
+      },
+      {
+        "name": "trackMotion",
+        "start": 4266,
+        "end": 4667,
+        "counts": [
+          289
+        ]
+      },
+      {
+        "name": "applyShake",
+        "start": 4667,
+        "end": 5345,
+        "counts": [
+          289
+        ]
+      },
+      {
+        "name": "updateChase",
+        "start": 6043,
+        "end": 6942,
+        "counts": [
+          113
+        ]
+      }
+    ]
+  }
+}

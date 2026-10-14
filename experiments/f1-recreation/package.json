@@ -1,0 +1,20 @@
+{
+  "name": "f1-recreation",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "REA 분석 결과를 바탕으로 재구현한 웹 레이싱 데모",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@types/three": "^0.186.0",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
+}
