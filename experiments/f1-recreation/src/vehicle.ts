@@ -6,7 +6,8 @@ import type { DriveCommand } from './controller';
  *
  * 원본은 Rapier 레이캐스트 서스펜션 4륜 + Pacejka 매직포뮬러를 쓰지만,
  * 이 데모는 물리 엔진 없이 자전거 모델(bicycle model) 2륜 등가로 근사한다. [자체설계]
- * 종방향 구동/제동/저항 식과 타이어 매직포뮬러 곡선은 분석에서 확인된 식 그대로다. [분석확인]
+ * 종방향 구동/제동/저항 식, 차량 제원, ERS 테이퍼, 휠 락 판정은 분석에서 확인된 값 그대로다. [분석확인]
+ * 원본의 액티브 에어로(직선 주행 시 drag/downforce 를 Gn 쪽으로 보간)는 구현하지 않는다. [자체설계]
  *
  * 좌표 규약 (three.js 오른손 좌표계, Y 업):
  *   전방 F = (-sin(yaw), 0, -cos(yaw))   // yaw=0 이면 -Z
@@ -26,6 +27,18 @@ const SLIP_SPEED_FLOOR = 3;
 const KINEMATIC_BLEND_LOW = 1;
 /** 이 속도 이상은 동역학(타이어) 모델 100% [자체설계] */
 const KINEMATIC_BLEND_HIGH = 8;
+/** ERS 테이퍼: 이 속도(km/h) 이하는 MGU-K 전개 100% [분석확인] Rn(v) */
+const ERS_FULL_KMH = 290;
+/** ERS 테이퍼: 이 속도(km/h)에서 MGU-K 전개 0% [분석확인] */
+const ERS_ZERO_KMH = 355;
+/** ERS 테이퍼 구간 폭 (km/h) [분석확인] (355 - 290) */
+const ERS_TAPER_SPAN = 65;
+/** 휠 락 판정 여유 계수 [분석확인] 요구제동력 > 그립한계 * 1.1 */
+const LOCK_MARGIN = 1.1;
+/** 휠 락 판정 최소 속도 (m/s) [분석확인] |v| > 2 */
+const LOCK_SPEED = 2;
+/** 잠긴 축의 횡그립 배수 [자체설계] 락 = 슬라이딩 마찰로 전환되어 횡력이 거의 사라진다 */
+const LOCKED_LATERAL_GRIP = 0.35;
 
 const UP = new Vector3(0, 1, 0);
 
@@ -39,6 +52,17 @@ export function magicFormula(slip: number): number {
 }
 
 /**
+ * ERS(MGU-K) 전개 테이퍼. [분석확인]
+ *   Rn(v) = kmh <= 290 ? 1 : max(0, (355 - kmh) / 65)
+ * 290 km/h 까지는 전량 전개, 355 km/h 에서 0 이 된다.
+ */
+export function ersTaper(speed: number): number {
+  const kmh = Math.abs(speed) * 3.6; // [분석확인]
+  if (kmh <= ERS_FULL_KMH) return 1; // [분석확인]
+  return Math.max(0, (ERS_ZERO_KMH - kmh) / ERS_TAPER_SPAN); // [분석확인]
+}
+
+/**
  * 마찰원: 종방향으로 쓴 그립만큼 횡그립이 줄어든다. [자체설계]
  *   scale = sqrt(1 - min(used/capacity, 1)^2)
  */
@@ -49,65 +73,89 @@ function frictionCircleScale(used: number, capacity: number): number {
 }
 
 export interface VehicleParams {
-  /** 질량 (kg) [자체설계] */
+  /** 질량 (kg) [분석확인] 차종표 kg = 800 */
   mass: number;
-  /** 무게중심 ~ 앞차축 거리 a (m) [자체설계] */
+  /** 무게중심 ~ 앞차축 거리 a (m) [분석확인] wheelBase/2 + 0.15 (formula 분기 CG z 오프셋) */
   frontAxle: number;
-  /** 무게중심 ~ 뒷차축 거리 b (m) [자체설계] */
+  /** 무게중심 ~ 뒷차축 거리 b (m) [분석확인] wheelBase/2 - 0.15 */
   rearAxle: number;
-  /** 요 관성모멘트 Izz (kg·m²) [자체설계] */
+  /** 요 관성모멘트 Izz (kg·m²) [자체설계] 원본은 Rapier 강체가 자동 계산 */
   yawInertia: number;
-  /** 가용 파워 (W) [자체설계] */
+  /** 무게중심 높이 (m) [분석확인] tune.cgHeight */
+  cgHeight: number;
+  /** 바퀴 반지름 (m) [분석확인] tune.wheelRadius */
+  wheelRadius: number;
+  /** 윤거 절반 (m) [분석확인] dims[1]/2 - 0.15 */
+  trackHalf: number;
+  /** 엔진 파워 (W) [분석확인] kw * 1000 * 드라이브트레인 효율 0.88 */
   enginePower: number;
-  /** 최고 속도 (m/s) [자체설계] */
+  /** MGU-K 파워 (W) [분석확인] 350 kW * 0.88. ERS 테이퍼가 걸리는 몫 */
+  mgukPower: number;
+  /** 최고 속도 (m/s) [분석확인] 번들 이분탐색 결과 */
+  topSpeed: number;
+  /** 물리 최고 속도 (m/s) [분석확인] topSpeed * 1.04 */
   maxSpeed: number;
   /** 추가 속도 리미터 (m/s). cap = min(maxSpeed, speedCap) [분석확인 구조 / 값 자체설계] */
   speedCap: number;
   /** 발진 G. engineForce = mass*G*launchG [분석확인] */
   launchG: number;
-  /** 다운포스 계수 (N/(m/s)²) [자체설계] */
+  /** 다운포스 계수 (N/(m/s)²) [분석확인] tune.downforce * 차종보정 */
   downforce: number;
-  /** 공기저항 계수 (N/(m/s)²) [자체설계] */
+  /** 공기저항 계수 (N/(m/s)²) [분석확인] 번들 top-speed 역산식 */
   dragCoefficient: number;
-  /** 구름저항 계수 [자체설계] */
+  /** 구름저항 계수 [분석확인] formula 분기 */
   rollingResistance: number;
-  /** 타이어 마찰계수 μ [자체설계] */
-  tireFriction: number;
+  /** 앞 타이어 마찰계수 [분석확인] tune.mu */
+  frontFriction: number;
+  /** 뒤 타이어 마찰계수 [분석확인] tune.mu * 1.03 */
+  rearFriction: number;
+  /** 앞 기계그립 계수 [분석확인] tune.grip[0] */
+  frontGrip: number;
+  /** 뒤 기계그립 계수 [분석확인] tune.grip[1] */
+  rearGrip: number;
+  /** 제동 그립 보정 [분석확인] 차종보정 braking */
+  brakingModifier: number;
   /** 최고 후진 속도 (m/s) [분석확인] */
   maxReverseSpeed: number;
-  /** 전륜 제동 배분 [분석확인] */
+  /** 전륜 제동 배분 [분석확인] 액티브 에어로 차량 분기 */
   brakeBias: number;
-  /** 뒤 타이어 그립 보정 배수 [자체설계] a<b 배치로 생기는 오버스티어를 상쇄 */
-  rearGripBias: number;
   /** 핸드브레이크 추가 감속 G [자체설계] */
   handbrakeG: number;
-  /** 핸드브레이크 시 뒤 타이어 그립 배수 [자체설계] */
+  /** 핸드브레이크 시 뒤 타이어 그립 배수 [분석확인] handbrakeGripFactor */
   handbrakeRearGrip: number;
-  /** 차체 중심 높이 (m) [자체설계] */
+  /** 차체 중심 높이 (m) [분석확인] = wheelRadius, 바퀴가 지면에 닿는 높이 */
   rideHeight: number;
   /** 월드 이동 한계 (±m) [자체설계] */
   worldLimit: number;
 }
 
 export const DEFAULT_VEHICLE: VehicleParams = {
-  mass: 798, // [자체설계] F1 최소 중량에서 따온 데모 기본값
-  frontAxle: 1.7, // [자체설계] wheelBase 3.6 = 1.7 + 1.9
-  rearAxle: 1.9, // [자체설계]
-  yawInertia: 798 * 1.9, // [자체설계] Izz = mass * 1.9
-  enginePower: 735000, // [자체설계] 약 1000마력
-  maxSpeed: 95, // [자체설계] 342 km/h
-  speedCap: 95, // [자체설계]
-  launchG: 1.4, // [분석확인]
-  downforce: 2.2, // [자체설계]
-  dragCoefficient: 0.9, // [자체설계]
-  rollingResistance: 0.013, // [자체설계]
-  tireFriction: 1.6, // [자체설계]
+  mass: 800, // [분석확인] 차종표 kg
+  frontAxle: 1.85, // [분석확인] 3.4/2 + 0.15
+  rearAxle: 1.55, // [분석확인] 3.4/2 - 0.15 → wheelBase 3.4
+  yawInertia: 800 * 1.55, // [자체설계] Izz = mass * b = 1,240 kg·m²
+  cgHeight: 0.33, // [분석확인] tune.cgHeight
+  wheelRadius: 0.36, // [분석확인] tune.wheelRadius
+  trackHalf: 0.8, // [분석확인] 1.9/2 - 0.15
+  enginePower: 695200, // [분석확인] 790*1000*0.88
+  mgukPower: 308000, // [분석확인] 350*1000*0.88
+  topSpeed: 97.756, // [분석확인] 352 km/h
+  maxSpeed: 101.666, // [분석확인] topSpeed * 1.04
+  speedCap: 97.756, // [자체설계] 리미터 기준선을 topSpeed 로 둔다 (원본은 세션별 가변)
+  launchG: 1.4, // [분석확인] engineForce = 800*9.81*1.4 = 10,987.2 N
+  downforce: 2.784, // [분석확인] 2.9 * 0.96
+  dragCoefficient: 0.51362, // [분석확인] 번들 top-speed 역산
+  rollingResistance: 0.03, // [분석확인] formula 분기
+  frontFriction: 1.75, // [분석확인] tune.mu
+  rearFriction: 1.8025, // [분석확인] tune.mu * 1.03
+  frontGrip: 0.9, // [분석확인] tune.grip[0]
+  rearGrip: 0.95, // [분석확인] tune.grip[1]
+  brakingModifier: 1.02, // [분석확인] 차종보정 braking
   maxReverseSpeed: 12, // [분석확인]
-  brakeBias: 0.6, // [분석확인]
-  rearGripBias: 1.2, // [자체설계]
-  handbrakeG: 1.5, // [자체설계]
-  handbrakeRearGrip: 0.3, // [자체설계]
-  rideHeight: 0.35, // [자체설계]
+  brakeBias: 0.56, // [분석확인] 액티브 에어로 차량 분기
+  handbrakeG: 1.5, // [자체설계] 추가 제동값은 미확인
+  handbrakeRearGrip: 0.3, // [분석확인] handbrakeGripFactor
+  rideHeight: 0.36, // [분석확인] = wheelRadius
   worldLimit: 1900, // [자체설계] 지면 4000×4000 안쪽
 };
 
@@ -135,6 +183,12 @@ export class Vehicle {
   lateralSpeed = 0;
   /** 물리 기준 조향각 (rad, + 가 좌회전) */
   steerAngle = 0;
+  /** 직전 스텝의 종가속도 (m/s²). 하중 이동 계산 입력 [자체설계] */
+  longAccel = 0;
+  /** 앞축 휠 락 여부 [분석확인] */
+  frontLocked = false;
+  /** 뒤축 휠 락 여부 [분석확인] */
+  rearLocked = false;
 
   /** 리셋 기준 위치 */
   readonly startPosition = new Vector3();
@@ -155,6 +209,16 @@ export class Vehicle {
     return this.forwardSpeed * 3.6; // [분석확인]
   }
 
+  /**
+   * 속도에 따른 가용 파워 (W). 원본 `zn()`. [분석확인]
+   *   availablePower(v) = enginePower - mgukPower + mgukPower * Rn(v)
+   * 290 km/h 이하 695.2 kW, 355 km/h 이상 387.2 kW.
+   */
+  availablePower(speed: number): number {
+    const p = this.params;
+    return p.enginePower - p.mgukPower + p.mgukPower * ersTaper(speed); // [분석확인]
+  }
+
   setStart(x: number, z: number, yaw: number): void {
     this.startPosition.set(x, this.params.rideHeight, z);
     this.startYaw = yaw;
@@ -169,6 +233,9 @@ export class Vehicle {
     this.forwardSpeed = 0;
     this.lateralSpeed = 0;
     this.steerAngle = 0;
+    this.longAccel = 0;
+    this.frontLocked = false;
+    this.rearLocked = false;
     this.velocity.set(0, 0, 0);
     this.quaternion.setFromAxisAngle(UP, this.yaw);
     this.prevPosition.copy(this.position);
@@ -192,9 +259,31 @@ export class Vehicle {
     let yawRate = this.yawRate;
     const speed = Math.hypot(vx, vy);
 
-    // --- 접지/저항 [분석확인] ---
-    // normalLoad = mass*G + downforce*v², drag = Cd*v², rolling = Crr*normalLoad
+    // --- 수직하중과 종방향 하중 이동 ---
+    // normalLoad = mass*G + downforce*v² [분석확인]
     const normalLoad = p.mass * G + p.downforce * speed * speed; // [분석확인]
+    // 정하중 배분 staticFront = b/(a+b), staticRear = a/(a+b) [분석확인: a=1.85, b=1.55]
+    const staticFront = p.rearAxle / wheelBase; // [분석확인]
+    const staticRear = p.frontAxle / wheelBase; // [분석확인]
+    // 종가속도에 의한 이동량 ΔW = mass*ax*cgHeight/wheelBase [자체설계: 표준 1차 하중이동 식]
+    // ax 는 직전 스텝에서 실제로 난 종가속도를 쓴다. 반복 수렴 대신 1스텝 지연을 택했다.
+    // (dt = 1/60 에서 지연이 16.7 ms 뿐이고, 제동력→하중→제동력 내부 반복이 필요 없다.) [자체설계]
+    const loadTransfer = (p.mass * this.longAccel * p.cgHeight) / wheelBase; // [자체설계]
+    // 가속(ax>0)이면 뒤로, 제동(ax<0)이면 앞으로 옮겨간다. 음수 하중은 0 으로 클램프.
+    const loadFront = Math.max(0, staticFront * normalLoad - loadTransfer); // [자체설계]
+    const loadRear = Math.max(0, staticRear * normalLoad + loadTransfer); // [자체설계]
+
+    // 기계그립 비중 보정 h = 1 + (grip - 1) * (mass*G) / normalLoad [분석확인]
+    // 다운포스가 붙을수록 1 로 수렴한다 = 고속에서는 에어로 그립이 지배한다.
+    const mechLoadRatio = (p.mass * G) / normalLoad; // [분석확인]
+    const muFront = p.frontFriction * (1 + (p.frontGrip - 1) * mechLoadRatio); // [분석확인]
+    // 핸드브레이크는 뒤 타이어 그립을 최대 0.3 배까지 떨어뜨린다 [분석확인]
+    const muRear =
+      p.rearFriction *
+      (1 + (p.rearGrip - 1) * mechLoadRatio) *
+      (1 - (1 - p.handbrakeRearGrip) * command.handbrake); // [분석확인]
+
+    // --- 저항 [분석확인] drag = Cd*v², rolling = Crr*normalLoad ---
     const dragForce = p.dragCoefficient * speed * speed; // [분석확인]
     const rollingForce = p.rollingResistance * normalLoad; // [분석확인]
 
@@ -206,20 +295,35 @@ export class Vehicle {
       const cap = Math.min(p.maxSpeed, p.speedCap); // [분석확인]
       const limiterFade = 1 - MathUtils.clamp((vx - cap * 0.985) / (cap * 0.015), 0, 1); // [분석확인]
       const launchDiv = 1.07 + 0.09 * Math.max(0, 1 - vx / (p.maxSpeed * 0.3)); // [분석확인]
+      // 파워는 고정값이 아니라 ERS 테이퍼가 걸린 속도 함수다 [분석확인]
       driveForce =
-        (command.drive * Math.min(engineForce, p.enginePower / vEff) * limiterFade) / launchDiv; // [분석확인]
+        (command.drive * Math.min(engineForce, this.availablePower(vx) / vEff) * limiterFade) /
+        launchDiv; // [분석확인]
     } else if (command.drive < 0) {
       const t = MathUtils.clamp(Math.max(-vx, 0) / p.maxReverseSpeed, 0, 1); // [분석확인]
       driveForce = command.drive * (p.mass * 5) * (1 - t * t); // [분석확인] reverseForce = mass * 5
     }
+    // 구동은 RWD [분석확인] → 뒤축 그립으로 제한한다. 가속 시 하중이 뒤로 실려 한계가 커진다. [자체설계]
+    const rearTraction = muRear * loadRear; // [자체설계]
+    driveForce = MathUtils.clamp(driveForce, -rearTraction, rearTraction); // [자체설계]
 
-    // --- 제동력 [분석확인] brakeForce = mass*G*4, 핸드브레이크는 추가 제동 [자체설계] ---
-    const brakeDemand =
-      command.brake * (p.mass * G * 4) + command.handbrake * (p.mass * G * p.handbrakeG);
-    // 타이어가 낼 수 있는 종방향 한계. 저속에선 4G 제동이 불가능하고 다운포스가 붙으면 가능해진다. [자체설계]
-    const tractionLimit = p.tireFriction * normalLoad; // [자체설계]
-    const brakeForce = Math.min(brakeDemand, tractionLimit); // [자체설계]
-    driveForce = MathUtils.clamp(driveForce, -tractionLimit, tractionLimit); // [자체설계]
+    // --- 축별 제동력: brakeForce = mass*G*4 를 brakeBias 로 배분 [분석확인] ---
+    const brakeTotal = command.brake * (p.mass * G * 4); // [분석확인]
+    const frontDemand = brakeTotal * p.brakeBias; // [분석확인]
+    // 핸드브레이크 추가 제동은 뒤축에만 더한다 [자체설계]
+    const rearDemand =
+      brakeTotal * (1 - p.brakeBias) + command.handbrake * (p.mass * G * p.handbrakeG);
+    // 축별 그립 한계 = μ * 축하중 * 제동 보정 [분석확인]
+    const frontBrakeGrip = muFront * loadFront * p.brakingModifier; // [분석확인]
+    const rearBrakeGrip = muRear * loadRear * p.brakingModifier; // [분석확인]
+    // 휠 락: 요구 제동력 > 그립한계 * 1.1 && |v| > 2 [분석확인]
+    const lockable = Math.abs(vx) > LOCK_SPEED; // [분석확인]
+    this.frontLocked = lockable && frontDemand > frontBrakeGrip * LOCK_MARGIN; // [분석확인]
+    this.rearLocked = lockable && rearDemand > rearBrakeGrip * LOCK_MARGIN; // [분석확인]
+    // 실제 제동력은 축별로 요구치와 그립 한계의 최솟값 [분석확인]
+    const frontBrake = Math.min(frontDemand, frontBrakeGrip); // [분석확인]
+    const rearBrake = Math.min(rearDemand, rearBrakeGrip); // [분석확인]
+    const brakeForce = frontBrake + rearBrake;
 
     // 진행 반대 방향으로 걸리는 힘의 합
     const resistForce = dragForce + rollingForce + brakeForce;
@@ -230,27 +334,24 @@ export class Vehicle {
     vx += (longForce / p.mass + yawRate * vy) * dt;
     // 저항/제동만으로 차가 뒤로 밀리지 않도록 0에서 멈춘다. [자체설계]
     if (command.drive === 0 && vxBefore !== 0 && Math.sign(vx) !== Math.sign(vxBefore)) vx = 0;
-
-    // --- 횡방향: 자전거 모델 + 매직포뮬러 [자체설계 구조 / 곡선은 분석확인] ---
-    const loadFront = (normalLoad * p.rearAxle) / wheelBase; // [자체설계] 정하중 배분
-    const loadRear = (normalLoad * p.frontAxle) / wheelBase; // [자체설계]
-    const muFront = p.tireFriction; // [자체설계]
-    // 뒤 타이어 그립: a<b 로 생기는 오버스티어 경향 보정 × 핸드브레이크 시 0.3배 [자체설계]
-    const muRear =
-      p.tireFriction * p.rearGripBias * (1 - (1 - p.handbrakeRearGrip) * command.handbrake);
+    // 다음 스텝 하중 이동에 쓸 실측 종가속도 [자체설계]
+    this.longAccel = (vx - vxBefore) / dt;
 
     // 마찰원: 축별 "순" 종방향 타이어력만큼 횡그립이 줄어든다.
-    // 제동은 brakeBias=0.6 으로 [분석확인], 구동력은 축하중 비례로 분배한다
-    // (원본은 4륜 레이캐스트에 구동력을 나눠 주므로 그 근사). 적용 방식은 [자체설계]
-    // 구동과 제동은 서로 반대 방향이라 합이 아니라 차로 상쇄시켜야 한다. [자체설계]
+    // 구동력은 RWD 라 전부 뒤축, 제동은 위에서 구한 축별 값. 구동과 제동은 서로 반대
+    // 방향이라 합이 아니라 차로 상쇄시킨다. 적용 방식은 [자체설계]
+    // 잠긴 축은 슬라이딩 마찰로 넘어가 횡력이 거의 사라진다. [자체설계]
     const brakeSign = vx >= 0 ? 1 : -1;
-    const longFront =
-      (driveForce * loadFront) / normalLoad - brakeSign * brakeForce * p.brakeBias; // [자체설계]
-    const longRear =
-      (driveForce * loadRear) / normalLoad - brakeSign * brakeForce * (1 - p.brakeBias); // [자체설계]
-    const gripFront = frictionCircleScale(Math.abs(longFront), muFront * loadFront); // [자체설계]
-    const gripRear = frictionCircleScale(Math.abs(longRear), muRear * loadRear); // [자체설계]
+    const longFront = -brakeSign * frontBrake; // [자체설계]
+    const longRear = driveForce - brakeSign * rearBrake; // [자체설계]
+    const gripFront =
+      frictionCircleScale(Math.abs(longFront), muFront * loadFront) *
+      (this.frontLocked ? LOCKED_LATERAL_GRIP : 1); // [자체설계]
+    const gripRear =
+      frictionCircleScale(Math.abs(longRear), muRear * loadRear) *
+      (this.rearLocked ? LOCKED_LATERAL_GRIP : 1); // [자체설계]
 
+    // --- 횡방향: 자전거 모델 + 매직포뮬러 [자체설계 구조 / 곡선은 분석확인] ---
     const subDt = dt / LATERAL_SUBSTEPS;
     const cosDelta = Math.cos(delta);
     const tanDelta = Math.tan(delta);

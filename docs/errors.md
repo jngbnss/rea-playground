@@ -130,3 +130,35 @@
 - 원인: —
 - 복구: —
 - 상태: **신규 오류 없음.** `npm run build` → `tsc --noEmit` 타입 오류 0, `✓ built in 169ms`, `dist/assets/index-Cj9_Hwt8.js 552.29 kB`
+
+---
+
+## 라운드 3 — 미확인 항목 해소 + 데모 물리 보강 (2026-10-14)
+
+### E-015 · MCP `tools/call` 인자 이름 불일치
+- 발생 단계: 검증
+- 증상:
+  ```
+  Input validation error: Invalid arguments for tool list_browser_targets:
+  cdp_endpoint: Invalid input: expected string, received undefined,
+  Unrecognized key: "endpoint"
+  ```
+- 원인: CLI는 위치 인자 이름이 `endpoint`지만, MCP 도구 스키마의 키는 `cdp_endpoint`다. 두 표면의 인자 이름이 다르다.
+- 복구: `tools/list` 응답의 `inputSchema`를 먼저 읽고 그 키를 그대로 사용. 재호출 시 `isError` 없이 Evidence 반환
+- 상태: 해결
+- 교훈: **MCP 도구 인자는 CLI `--help`가 아니라 `tools/list`의 스키마를 봐야 한다.**
+
+### E-016 · 감시 프로세스 Chrome이 즉시 종료되는 현상 (E-008 후속)
+- 발생 단계: 분석
+- 증상: `ready` 판정 직후 exit code 0. 같은 `--user-data-dir`을 재사용한 두 번째 기동에서 재현
+- 원인: 추정 — 직전 인스턴스가 프로필 락을 쥔 채 종료 중이면, 새 프로세스가 기존 인스턴스에 요청을 넘기고 자신은 즉시 종료한다. 포트가 아직 열려 있어 준비 검사는 통과해 버린다
+- 복구: ① 프로필 디렉터리를 새로 지정(`chrome-rea-2`, `chrome-rea-3`) ② `detached: true`로 기동 ③ 기동 후 `GET /json/version`으로 실제 응답을 확인
+- 상태: 해결
+
+### E-017 · 표기 최고속과 실제 최고속이 다름 (분석 함정)
+- 발생 단계: 분석
+- 증상: 차량 테이블의 Ferrari `top = 348 km/h`를 그대로 최고속으로 쓰려 했으나, 실제 설정 빌더가 값을 덮어씀
+- 원인: 번들의 `er()`가 특성 보정(`traits`)을 반영해 **40회 이분탐색으로 최고속을 다시 푼 뒤 `e.top`에 재대입**한다. 테이블 값은 입력이지 결과가 아니다
+- 복구: 번들의 계산 과정을 그대로 재실행 → 실제 최고속 **352 km/h**(97.756 m/s) 확정. 데모도 이 값을 사용
+- 상태: 해결
+- 교훈: **데이터 테이블의 값을 "결과"로 착각하지 말 것.** 그 값을 읽는 코드까지 따라가야 한다.

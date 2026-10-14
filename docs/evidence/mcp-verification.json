@@ -1,0 +1,80 @@
+{
+  "note": "REA MCP stdio 서버를 직접 띄워 JSON-RPC로 검증한 기록. Codex 재시작 없이 MCP 표면 자체를 확인했다.",
+  "transport": "stdio JSON-RPC 2.0",
+  "command": [
+    "node",
+    "<npx cache>/rea-agents/scripts/rea.mjs",
+    "mcp"
+  ],
+  "initialize": {
+    "protocolVersion": "2024-11-05",
+    "serverInfo": {
+      "name": "rea",
+      "version": "6.4.0"
+    },
+    "capabilities": {
+      "tools": {
+        "listChanged": true
+      },
+      "completions": {},
+      "prompts": {
+        "listChanged": true
+      }
+    }
+  },
+  "tools_total": 170,
+  "prompts": [
+    "investigate_feature",
+    "compare_application_versions",
+    "verify_reconstruction",
+    "trace_crash",
+    "audit_residual_unknowns",
+    "prepare_bounded_process_capture"
+  ],
+  "web_tools": [
+    "trace_web_module_imports",
+    "trace_web_source_location",
+    "observe_web_execution",
+    "inspect_web_event_listeners",
+    "inspect_web_network_capture",
+    "recover_javascript_sources",
+    "export_web_scripts",
+    "list_browser_targets",
+    "inspect_web_page",
+    "analyze_web_bundle",
+    "observe_web_session",
+    "discover_webmcp_tools",
+    "compare_web_captures",
+    "capture_web_screenshot",
+    "compare_web_screenshots",
+    "capture_browser_scenario",
+    "analyze_javascript_application",
+    "reconcile_javascript_runtime",
+    "list_javascript_runtime_targets",
+    "observe_javascript_runtime",
+    "trace_javascript_semantics",
+    "compare_javascript_export_shapes"
+  ],
+  "tools_call_proof": {
+    "name": "list_browser_targets",
+    "arguments": {
+      "cdp_endpoint": "http://127.0.0.1:9222"
+    },
+    "isError": false,
+    "evidence_id": "ev_8e8a06cfb3a050337b7f6c3f07ab4b72fd363f0e8fa892f546d9013e990e9ce1",
+    "provider": {
+      "id": "rea-cdp-browser",
+      "name": "REA Chrome DevTools Protocol observation provider",
+      "version": "2"
+    },
+    "browser": {
+      "product": "Chrome/155.0.8059.41",
+      "protocol_version": "1.3",
+      "revision": "537.36 (@96e02f81f8f3430db10a322d20b2b13e8a3288e9)",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36",
+      "js_version": "15.5.35.20"
+    },
+    "targets_count": 1
+  },
+  "schema_lesson": "인자 이름은 CLI 위치 인자명이 아니라 스키마 키(cdp_endpoint)다. endpoint 로 보내면 Input validation error."
+}

@@ -41,9 +41,53 @@ args = [ "…\\rea-agents\\scripts\\rea.mjs", "mcp" ]
 startup_timeout_sec = 30
 ```
 
-> 이번 분석은 전부 **REA CLI**로 수행했다. MCP 경로(Codex 안에서 `rea` 도구 호출)는
-> 등록·검증까지 완료했으나, Codex 세션 재시작이 필요하므로 이번 라운드의 분석 근거로는
-> 쓰지 않았다. **MCP 도구를 통한 분석을 했다고 주장하지 않는다.**
+> **1라운드**: 분석은 전부 **REA CLI**로 수행했다. MCP 경로는 등록·검증만 마쳤고,
+> Codex 세션 재시작이 필요해 분석 근거로 쓰지 않았다.
+>
+> **2라운드**: Codex 재시작을 기다리지 않고 **MCP 서버 자체를 직접 검증**했다(아래 1-2절).
+
+### 1-2. MCP 경로 실제 검증 (2라운드)
+
+`.codex/config.toml`에 등록된 것과 **동일한 커맨드**로 REA를 stdio MCP 서버로 띄우고,
+JSON-RPC 2.0으로 직접 대화했다. 즉 "Codex가 하게 될 일"을 그대로 재현한 것이다.
+
+```
+node <npx cache>/rea-agents/scripts/rea.mjs mcp
+```
+
+| 단계 | 요청 | 응답 |
+| --- | --- | --- |
+| 1 | `initialize` (protocol `2024-11-05`) | `serverInfo: { name: "rea", version: "6.4.0" }` |
+| 2 | — | `capabilities: { tools: {listChanged}, prompts: {listChanged}, completions: {} }` |
+| 3 | `notifications/initialized` | — |
+| 4 | `tools/list` | **170개** |
+| 5 | `prompts/list` | 6개: `investigate_feature`, `compare_application_versions`, `verify_reconstruction`, `trace_crash`, `audit_residual_unknowns`, `prepare_bounded_process_capture` |
+| 6 | `tools/call` `list_browser_targets` | `isError: false`, Evidence 반환 |
+
+6번의 실제 반환값(요약):
+
+```json
+{
+  "evidence_id": "ev_8e8a06cf…9ce1",
+  "provider": { "id": "rea-cdp-browser", "version": "2" },
+  "predicate_type": "rea.browser-target-list",
+  "normalized_result": { "browser": { "product": "Chrome/155.0.8059.41" }, "targets": [ … ] }
+}
+```
+
+→ **MCP 표면이 실제로 동작하며, CLI와 동일한 Evidence 구조를 돌려준다**는 것을 확인했다.
+전체 기록: `docs/evidence/mcp-verification.json`
+
+주의: MCP 도구의 인자 이름은 **CLI 위치 인자명이 아니라 스키마 키**다.
+`endpoint`로 보내면 `Input validation error`가 난다 → 올바른 키는 `cdp_endpoint` (`errors.md` E-015).
+
+웹 분석 계열 MCP 도구 22종이 노출된다:
+`inspect_web_page`, `observe_web_execution`, `export_web_scripts`, `analyze_javascript_application`,
+`analyze_web_bundle`, `trace_javascript_semantics`, `capture_browser_scenario`,
+`compare_web_captures`, `capture_web_screenshot` 등.
+
+> 여전히 하지 않은 것: **Codex 세션 안에서** REA 도구를 호출하는 것.
+> 그건 Codex 재시작 이후에만 가능하며, 했다고 주장하지 않는다.
 
 ---
 
@@ -235,15 +279,31 @@ node scripts/measure-throttle.mjs
 
 ---
 
-## 6. 분석의 한계 (다시, 명시적으로)
+## 6. 분석의 한계 (2라운드 기준으로 갱신)
+
+### 아직 남아 있는 한계
 
 1. **소스맵이 없다.** 모든 함수·변수 이름은 번들러 축약명이다. 원본 모듈 구조는 알 수 없다.
-2. **WASM 내부를 보지 않았다.** Rapier의 실제 적분기·솔버 동작은 미확인이다.
-   JS 쪽 호출 경계(`applyImpulseAtPoint`, `castRayAndGetNormal`, `linvel`, `angvel`)까지만 확인했다.
+2. **WASM 내부를 보지 않았다.** Rapier의 적분기·솔버 동작은 여전히 **[미확인]**이다.
+   단, 2라운드에서 **JS → WASM 호출 경계 27종을 전부 열거**해 "무엇을 WASM에 맡기는지"는 확정했다
+   (`03-vehicle-controls.md` 10절). 결론: 타이어·서스펜션·구동력 계산은 모두 JS에 있고,
+   WASM은 충격량을 받아 적분·레이캐스트만 한다.
 3. **`recover-javascript-sources`를 쓰지 못했다.** Wakaru(Linux x64 전용) 의존 → Windows 불가.
-   따라서 "번들에서 원본 모듈 복원"은 시도하지 못했고, 축약 코드를 직접 읽었다.
-4. **차종 튜닝 테이블의 개별 수치를 확정하지 못했다.** 특히 조향 각도 3종.
-5. **성능 수치는 측정 환경에 종속된다.** 관찰 시 FPS 30–32, 렌더 해상도 0.50×.
+   축약 코드를 직접 읽는 방식으로 우회했다.
+4. **성능 수치는 측정 환경에 종속된다.** 관찰 시 FPS 30–32, 렌더 해상도 0.50×.
    다른 GPU·창 크기에서는 달라진다.
-6. **1회 주행만 계측했다.** 통계적 분산을 말할 수 없다.
-7. **MCP 경로로는 분석하지 않았다.** 등록·검증만 완료, 실제 질의는 CLI로 수행.
+5. **각 측정은 1회 주행이다.** 통계적 분산을 말할 수 없다.
+6. **Codex 세션 내부에서 REA 도구를 호출하지는 않았다.** MCP 서버 자체는 직접 검증했으나
+   (1-2절), 클라이언트가 Codex인 경로는 재시작 이후에만 확인 가능하다.
+7. **오버테이크 모드·ERS 충전 모델·타이어 마모·기어박스**는 코드 위치만 확인했고
+   수식을 끝까지 풀지 않았다.
+
+### 2라운드에서 해소된 한계
+
+| 1라운드 한계 | 현재 상태 | 근거 |
+| --- | --- | --- |
+| 차종 튜닝 테이블 개별 수치 **[미확인]** | **해소** — 13개 바디 프리셋 + 10개 F1 차량 전부 확정 | `03` 9-1, 9-2절 |
+| 조향 각도 3종 **[미확인]** | **해소** — F1 `0.50 / 0.07 / 70` | `03` 9-1절 |
+| `availablePower`가 상수인지 불명 | **해소** — ERS 테이퍼 `Rn(v)` 확정 | `03` 9-3절 |
+| MCP 경로 미검증 | **부분 해소** — 서버 직접 검증 완료, Codex 경유만 미검증 | `04` 1-2절 |
+| WASM 경계 불명 | **해소** — 호출 API 27종 열거 | `03` 10절 |

@@ -22,20 +22,20 @@ export interface SteeringTuning {
   readonly steerRate: number;
   /** 조향 복귀 슬루율 (1/s) [분석확인] */
   readonly steerReturnRate: number;
-  /** 저속 최대 조향각 (rad) [자체설계] */
+  /** 저속 최대 조향각 (rad) [분석확인] tune.steer[0] */
   readonly maxSteerLowSpeed: number;
-  /** 고속 최대 조향각 (rad) [자체설계] */
+  /** 고속 최대 조향각 (rad) [분석확인] tune.steer[1] */
   readonly maxSteerHighSpeed: number;
-  /** 조향각이 고속값으로 수렴하는 기준 속도 (m/s) [자체설계] */
+  /** 조향각이 고속값으로 수렴하는 기준 속도 (m/s) [분석확인] tune.steer[2] */
   readonly steerFadeSpeed: number;
 }
 
 export const DEFAULT_STEERING: SteeringTuning = {
   steerRate: 3.4, // [분석확인]
   steerReturnRate: 5.8, // [분석확인]
-  maxSteerLowSpeed: 0.42, // [자체설계] 원본은 차종표에서 읽어오며 값 미확인
-  maxSteerHighSpeed: 0.12, // [자체설계] 동일
-  steerFadeSpeed: 42, // [자체설계] 동일
+  maxSteerLowSpeed: 0.5, // [분석확인] f1 튜닝 steer[0] = 0.50 rad (28.6°)
+  maxSteerHighSpeed: 0.07, // [분석확인] f1 튜닝 steer[1] = 0.07 rad, 포화값은 ×1.35 = 0.0945
+  steerFadeSpeed: 70, // [분석확인] f1 튜닝 steer[2] = 70 m/s (252 km/h)
 };
 
 /** 민첩 핸들링 프리셋 배수 [분석확인] */

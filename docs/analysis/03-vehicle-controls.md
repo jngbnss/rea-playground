@@ -380,10 +380,129 @@ updateChase(target, speedRatio, dt) {
 | `engineForce = m·g·1.4`, `brakeForce = m·g·4` | **[사실]** |
 | 조향 슬루율 3.4 / 5.8, 보정 1.9 / 1.4 / 1.35 | **[사실]** |
 | `maxSteer` 속도 페이드 곡선 `n(2−n)` | **[사실]** |
-| `maxSteerLowSpeed / HighSpeed / FadeSpeed` 실제 수치 | **[미확인]** |
+| `maxSteerLowSpeed / HighSpeed / FadeSpeed` 실제 수치 | **[사실]** · 2라운드 확정 (아래 9절) |
 | 매직 포뮬러 B=36, C=1.2, E=0.3 | **[사실]** |
 | 고정 스텝 1/60 · 최대 5 서브스텝 · 보간 렌더 | **[사실]** |
 | 체이스 카메라 상수 전체 | **[사실]** |
 | 0→100 km/h 약 2.9초 | **[관찰]** (노면 이탈 상태, 최적값 아님) |
 | Rapier WASM 내부 적분 방식 | **[미확인]** (WASM 바이너리 미분석) |
-| 차종별 튜닝 테이블의 개별 수치 | **[미확인]** |
+| 차종별 튜닝 테이블의 개별 수치 | **[사실]** · 2라운드 확정 (아래 9절) |
+| Rapier WASM **호출 경계** 목록 | **[사실]** · 2라운드 확정 (10절) |
+
+---
+
+## 9. 2라운드 추가 확정 — 차종 튜닝 테이블 (1라운드 [미확인] 해소)
+
+1라운드에서 "차종 데이터 테이블 안에 있고 축약 변수로만 참조되어 확정 못 함"이라고 적었던
+값들을 전부 찾아냈다. 근거는 동일한 번들 파일(`index-CZ5aQSby.js`, sha256 `01f6873977d93ea5…`)이다.
+
+### 9-1. 바디 튜닝 프리셋 `Zn` **[사실]** `@ 35,330–36,900`
+
+`steer: [maxSteerLowSpeed, maxSteerHighSpeed, steerFadeSpeed]` — 단위는 rad, rad, m/s.
+
+| 바디 | μ | downforce | steer (low / high / fade) | grip (front/rear) |
+| --- | ---: | ---: | --- | --- |
+| hatch | 1.02* | 0.04* | 0.60 / 0.120 / 42 | 0.85 / 0.90 |
+| coupe | 1.12 | 0.08 | 0.58 / 0.105 / 48 | — |
+| roadster | 1.08 | 0.03 | 0.60 / 0.110 / 46 | — |
+| mid | 1.18 | 0.14 | 0.56 / 0.100 / 50 | — |
+| gt3 | 1.45 | 0.95 | 0.55 / 0.085 / 55 | 0.88 / 0.92 |
+| supercar | 1.28 | 0.35 | 0.54 / 0.085 / 58 | 0.88 / 0.92 |
+| lmp | 1.60 | 2.00 | 0.50 / 0.072 / 66 | 0.90 / 0.95 |
+| **f1** | **1.75** | **2.90** | **0.50 / 0.070 / 70** | **0.90 / 0.95** |
+| openwheel | 1.60 | 2.00 | 0.50 / 0.075 / 66 | 0.90 / 0.95 |
+| indy | 1.62 | 2.30 | 0.50 / 0.070 / 70 | 0.90 / 0.95 |
+| fe | 1.38 | 1.00 | 0.52 / 0.080 / 62 | 0.90 / 0.95 |
+
+\* `hatch`는 베이스(`Xn`)이고 `sedan`/`wagon`은 휠 반경만 다른 파생형이다.
+
+F1 전용 추가값: `cgHeight 0.33`, `antiRollPerKg [120, 95]`, `wheelRadius 0.36`,
+`springPerKg 56`, `damperPerKg 3.25`, `rest 0.3`.
+
+→ **F1의 고속 포화 조향각은 `0.07 × 1.35 = 0.0945 rad` (약 5.4°)** 이다.
+  `steerFadeSpeed = 70 m/s(252 km/h)`이므로 조향각 축소가 매우 늦게까지 진행된다.
+
+### 9-2. 차량 데이터 테이블 **[사실]** `@ 42,947`
+
+```js
+var cr = (cls, rows) => rows.map(([id, brand, model, body, kw, kg, top, drive,
+                                   dims, engine, color, accent, limited]) => ({ … }));
+var lr = [5.4, 1.9, 0.95, 3.4];     // 전장, 전폭, 전고, 휠베이스 (F1 공통)
+var ur = cr(`formula`, [
+  [`f1-ferrari`,  `Ferrari`,  `F1 2026`, `f1`, 790, 800, 348, `RWD`, lr, `f1`, …],
+  [`f1-mercedes`, `Mercedes`, `F1 2026`, `f1`, 785, 800, 347, `RWD`, lr, `f1`, …],
+  [`f1-redbull`,  `Red Bull`, `F1 2026`, `f1`, 765, 800, 343, `RWD`, lr, `f1`, …],
+  …10개 팀
+]);
+```
+
+Ferrari 기준: **790 kW · 800 kg · 표기 최고속 348 km/h · RWD · 휠베이스 3.4 m**.
+
+차량별 특성 보정 `dr["f1-ferrari"]` **[사실]**:
+`{ downforce: 0.96, drag: 0.94, grip: 0.985, traction: 0.97, braking: 1.02, tyreWear: 0.95 }`
+(라벨: `최고속도 · 파워 / 저속 트랙션 약함`)
+
+### 9-3. ERS(MGU-K) 파워 테이퍼 **[사실]** `@ 33,421`
+
+```js
+function Rn(v, overtake = false) {
+  const kmh = v * 3.6;
+  const start = overtake ? 337 : 290;
+  return kmh <= start ? 1 : Math.max(0, (355 - kmh) / (355 - start));
+}
+function zn(cfg, v, overtake) {           // availablePower
+  return cfg.enginePower - cfg.mgukPower + cfg.mgukPower * Rn(v, overtake);
+}
+```
+
+→ **290 km/h까지는 전력(全力), 355 km/h에서 MGU-K 기여가 0**이 되는 선형 테이퍼.
+오버테이크 모드(`O` 키)에서는 테이퍼 시작점이 337 km/h로 밀린다.
+이것이 1-4절의 `availablePower`가 상수가 아닌 이유다.
+
+### 9-4. 설정값 전체 재계산 (번들의 식을 그대로 실행한 결과)
+
+전역 상수 **[사실]**: `G = 9.81`, 드라이브트레인 효율 `0.88`, formula 구름저항 `0.03`,
+MGU-K 정격 `350 kW`, 액티브 에어로 `{ drag: 0.7, downforce: 0.55 }`,
+기준속 `Jn = 345/3.6`, 기준출력 `qn = 760 kW`, 다운포스 민감도 `Yn = 0.5`.
+
+| 설정값 | 계산 결과 | 유도 |
+| --- | ---: | --- |
+| `enginePower` | 695,200 W | `790 kW × 0.88` |
+| `mgukPower` | 308,000 W | `350 kW × 0.88` |
+| `rollingResistance` | 0.03 | formula 분기 |
+| `downforce` | 2.784 | `2.9 × 0.96` |
+| `dragCoefficient` | 0.51362 | 번들의 최고속 역산식 + traits 보정 |
+| 최종 `topSpeed` | 97.756 m/s = **352 km/h** | 번들의 40회 이분탐색 |
+| `maxSpeed` | 101.666 m/s | `topSpeed × 1.04` |
+| `engineForce` | 10,987 N | `800 × 9.81 × 1.4` |
+| `brakeForce` | 31,392 N | `800 × 9.81 × 4` |
+| `brakeBias` | 0.56 | 액티브 에어로 차량 |
+| `frontFriction / rearFriction` | 1.75 / 1.8025 | `μ`, `μ × 1.03` |
+
+흥미로운 점: 테이블의 표기 최고속은 348 km/h인데, 특성 보정을 반영해 번들이 **다시 풀어낸**
+최고속은 352 km/h다. 즉 **표기값은 입력이고 실제값은 계산 결과**다 (`e.top`을 덮어쓴다).
+
+## 10. Rapier(WASM) 호출 경계 **[사실]**
+
+WASM 내부는 여전히 **[미확인]**이지만, JS가 WASM에 무엇을 요구하는지는 전부 셀 수 있다.
+`Game-CGRrnhwj.js`에서 호출되는 Rapier API와 등장 횟수:
+
+| API | 횟수 | 쓰임 |
+| --- | ---: | --- |
+| `castRay` | 24 | 지형·충돌 질의 |
+| `applyImpulse` | 14 | 충격량 적용 |
+| `castRayAndGetNormal` | 12 | **서스펜션 레이캐스트** (법선 필요) |
+| `createCollider` | 12 | 콜라이더 생성 |
+| `linvel` | 11 | 선속도 읽기 |
+| `setTranslation` / `setRotation` | 11 / 9 | 리셋·텔레포트 |
+| `createRigidBody` | 8 | 강체 생성 |
+| `wakeUp` | 8 | 슬립 해제 |
+| `intersectionsWithRay` / `contactPair` | 6 / 6 | 충돌 이벤트 |
+| `applyImpulseAtPoint` | 5 | **바퀴 위치에 서스펜션·타이어 힘 적용** |
+| `angvel` | 5 | 각속도 읽기 |
+| `applyTorqueImpulse` | 3 | 자세 보정 |
+| `world.step` | 1 | 월드 적분 (고정 timestep) |
+
+→ 차량 물리의 실체는 **"JS가 매 고정 스텝마다 바퀴 4개 위치에 충격량을 꽂아 넣고,
+Rapier는 그 결과를 적분만 한다"** 는 구조다. 타이어 모델·서스펜션·구동력은 전부 JS에 있다.
+이것이 1라운드에서 JS만 읽고도 조작 로직을 복원할 수 있었던 이유다.

@@ -63,8 +63,16 @@ export class Hud {
   /**
    * @param speedKmh [분석확인] speedKmh = forwardSpeed * 3.6, 정수 반올림 표시
    * @param sources  활성 입력 소스 이름 (없으면 none)
+   * @param frontLocked 앞축 휠 락 [분석확인] 요구제동력 > 그립한계*1.1 && |v| > 2
+   * @param rearLocked  뒤축 휠 락
    */
-  update(speedKmh: number, input: VehicleInput, sources: readonly string[]): void {
+  update(
+    speedKmh: number,
+    input: VehicleInput,
+    sources: readonly string[],
+    frontLocked: boolean,
+    rearLocked: boolean,
+  ): void {
     const rounded = Math.round(speedKmh); // [분석확인]
     if (rounded !== this.lastSpeed) {
       this.lastSpeed = rounded;
@@ -78,9 +86,18 @@ export class Hud {
     }
 
     const steer = input.steer >= 0 ? `+${input.steer.toFixed(2)}` : input.steer.toFixed(2);
+    // 휠 락 표시 [자체설계: 표기 방식]
+    const lock = frontLocked
+      ? rearLocked
+        ? ' · LOCK F+R'
+        : ' · LOCK F'
+      : rearLocked
+        ? ' · LOCK R'
+        : '';
     const channels =
       `throttle ${input.throttle.toFixed(2)} · brake ${input.brake.toFixed(2)} · steer ${steer}` +
-      (input.handbrake > 0 ? ' · handbrake' : '');
+      (input.handbrake > 0 ? ' · handbrake' : '') +
+      lock;
     if (channels !== this.lastChannels) {
       this.lastChannels = channels;
       this.channelLine.textContent = channels;

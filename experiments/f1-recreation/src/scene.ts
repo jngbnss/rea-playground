@@ -20,25 +20,31 @@ import {
   Vector3,
   WebGLRenderer,
 } from 'three';
+import { DEFAULT_VEHICLE } from './vehicle';
 
 /**
  * 씬 구성: 지면 + 타원 트랙 참조물 + 조명 + 박스 기반 차량.
  * 외부 에셋/모델 없이 전부 프리미티브로만 만든다. 전방은 -Z 규약.
  */
 
-/** 타원 트랙 제원 [자체설계] */
+/**
+ * 타원 트랙 제원 [자체설계]
+ * 최고속이 352 km/h(97.8 m/s)로 확정되면서 기존 320×210 m 로는 전개 구간이 모자랐다.
+ * 최소 곡률반경은 장축 끝의 `B²/A = 320²/460 ≈ 222 m` → 97.8 m/s 에서 필요한 횡가속은
+ * `v²/R ≈ 43 m/s²`, 그 속도의 그립 한계 `μ(mg + downforce·v²)/m ≈ 75 m/s²` 안쪽이다.
+ */
 export const TRACK = {
-  /** X 반경 (m). 250 km/h 선회(≈2.2G)가 가능한 크기 */
-  radiusX: 320,
+  /** X 반경 (m) */
+  radiusX: 460,
   /** Z 반경 (m) */
-  radiusZ: 210,
+  radiusZ: 320,
   /** 노면 폭 (m) */
-  width: 24,
-  /** 둘레 분할 수 */
-  segments: 320,
+  width: 28,
+  /** 둘레 분할 수. 둘레 ≈ 2,470 m → 블록 간격 약 5.1 m */
+  segments: 480,
   /** 출발 지점: 타원 θ=0 의 중앙선 */
   startX: 0,
-  startZ: 210,
+  startZ: 320,
   /** 출발 헤딩: 전방 = +X (θ=0 의 접선) */
   startYaw: -Math.PI / 2,
 } as const;
@@ -99,23 +105,25 @@ function createCar(): { group: Group; frontWheels: Mesh[] } {
   add(new BoxGeometry(0.06, 0.3, 0.42), darkMaterial, 0.57, 0.5, 2.15);
   add(new BoxGeometry(0.06, 0.3, 0.42), darkMaterial, -0.57, 0.5, 2.15);
 
-  // 바퀴: 앞 z=-1.7 (frontAxle 1.7), 뒤 z=+1.9 (rearAxle 1.9)
-  const frontWheelGeometry = new BoxGeometry(0.3, 0.68, 0.68);
-  const rearWheelGeometry = new BoxGeometry(0.36, 0.72, 0.72);
+  // 바퀴: 앞 z=-1.85, 뒤 z=+1.55 (CG 기준 a/b), 좌우 ±0.8 (윤거 절반), 지름 0.72 [분석확인]
+  const { frontAxle, rearAxle, trackHalf, wheelRadius } = DEFAULT_VEHICLE;
+  const wheelSize = wheelRadius * 2;
+  const frontWheelGeometry = new BoxGeometry(0.3, wheelSize, wheelSize);
+  const rearWheelGeometry = new BoxGeometry(0.38, wheelSize, wheelSize);
   const frontWheels = [
-    add(frontWheelGeometry, tyreMaterial, 0.72, -0.01, -1.7),
-    add(frontWheelGeometry, tyreMaterial, -0.72, -0.01, -1.7),
+    add(frontWheelGeometry, tyreMaterial, trackHalf, 0, -frontAxle),
+    add(frontWheelGeometry, tyreMaterial, -trackHalf, 0, -frontAxle),
   ];
-  add(rearWheelGeometry, tyreMaterial, 0.78, 0.01, 1.9);
-  add(rearWheelGeometry, tyreMaterial, -0.78, 0.01, 1.9);
+  add(rearWheelGeometry, tyreMaterial, trackHalf, 0, rearAxle);
+  add(rearWheelGeometry, tyreMaterial, -trackHalf, 0, rearAxle);
 
-  // 섀도맵 없이 쓰는 접지 그림자 대용
+  // 섀도맵 없이 쓰는 접지 그림자 대용. 크기는 차종표 dims 의 전폭×전장 [분석확인]
   const shadow = new Mesh(
-    new PlaneGeometry(2.6, 5.8),
+    new PlaneGeometry(1.9, 5.4),
     new MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.32, depthWrite: false }),
   );
   shadow.rotation.x = -Math.PI / 2;
-  shadow.position.y = -0.34;
+  shadow.position.y = -wheelRadius;
   group.add(shadow);
 
   return { group, frontWheels };
@@ -235,7 +243,7 @@ function createTrack(): Group {
   group.add(startLine);
 
   // 외곽 구조물: 속도감을 주는 참조물
-  const standCount = 14;
+  const standCount = 20;
   const stands = new InstancedMesh(
     new BoxGeometry(26, 9, 8),
     new MeshStandardMaterial({ color: 0x343b49, roughness: 0.9 }),
@@ -268,7 +276,8 @@ export function createDemoScene(container: HTMLElement): DemoScene {
   const scene = new Scene();
   const skyColor = new Color(0x111d33);
   scene.background = skyColor;
-  scene.fog = new Fog(skyColor, 320, 1600);
+  // 트랙이 커진 만큼 포그 시작/끝도 늘린다 [자체설계]
+  scene.fog = new Fog(skyColor, 420, 2200);
 
   const camera = new PerspectiveCamera(62, width / height, 0.1, 4000);
   camera.position.set(0, 4, 12);

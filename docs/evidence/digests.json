@@ -35,6 +35,46 @@
       "sha256": "99343cc3366a86f456248534bff6a12315129c7a9d93068842955513115b233b",
       "bytes": 835548,
       "committed": true
+    },
+    "mcp-verification.json": {
+      "sha256": "fe9074b7d9a25f66e16a354db1f5004082d8217fad4d3b4750fb501af5951e9a",
+      "bytes": 2410,
+      "committed": true
+    },
+    "throttle-run-demo.csv": {
+      "sha256": "b58bd0c17c57e43442e18d859e8abfe42d82c73c52df7f63f4e4886145bbbd32",
+      "bytes": 1245,
+      "committed": true
+    },
+    "throttle-run-original-clean.csv": {
+      "sha256": "e2c4bf80e4f896df7d62c7ea9f290b474d3b7845245f53da76e2f3196d710046",
+      "bytes": 751,
+      "committed": true
+    },
+    "brake-runs.csv": {
+      "sha256": "c6b1d90260941499b3a2c5d357d2dcc83158d1f47990ca7ea28b4bcbf1d08a99",
+      "bytes": 1371,
+      "committed": true
+    },
+    "coverage-summary.json": {
+      "sha256": "f73c4f4f6ac576457bf9e3a4eece21450789debed086aa7ce92adcc048cfc083",
+      "bytes": 6398,
+      "committed": true
+    },
+    "r3-throttle-demo.csv": {
+      "sha256": "329b130648a49c3033cf457e273bb96965eda7d88d6e0eb2bd50e545586b16ce",
+      "bytes": 873,
+      "committed": true
+    },
+    "r3-throttle-original.csv": {
+      "sha256": "58e3df577b0444bfa54d9deda065a63c2cf2211f53c90d350842a972289df191",
+      "bytes": 1070,
+      "committed": true
+    },
+    "r3-brake-demo.csv": {
+      "sha256": "87e38e8776e1888f8436ca91ddd11a5f43c4cfd1085c3a2993f712d920c39ab2",
+      "bytes": 202,
+      "committed": true
     }
   }
 }

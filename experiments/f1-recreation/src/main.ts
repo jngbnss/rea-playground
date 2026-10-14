@@ -64,7 +64,13 @@ const loop = new FixedStepLoop({
 
     const speedRatio = Math.abs(vehicle.forwardSpeed) / vehicle.params.maxSpeed;
     chase.update(view.car.position, view.car.quaternion, speedRatio, frameDt);
-    hud.update(vehicle.speedKmh, lastInput, input.activeSources);
+    hud.update(
+      vehicle.speedKmh,
+      lastInput,
+      input.activeSources,
+      vehicle.frontLocked,
+      vehicle.rearLocked,
+    );
   },
 
   render(): void {
