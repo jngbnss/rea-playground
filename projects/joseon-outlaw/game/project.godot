@@ -10,6 +10,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 [autoload]
 QuestManager="*res://scripts/quest_manager.gd"
 CombatCoordinator="*res://scripts/combat_coordinator.gd"
+AIClient="*res://scripts/ai_client.gd"
 
 [display]
 window/size/viewport_width=1280

@@ -1,6 +1,6 @@
 extends Node3D
 
-const IMPLEMENTED_PHASE := 5
+const IMPLEMENTED_PHASE := 6
 const INTERACTION_RANGE := 3.0
 
 @onready var player: PlayerController = $Player
@@ -13,6 +13,7 @@ const INTERACTION_RANGE := 3.0
 
 var _smoke_phase := 0
 var _screenshot_path := ""
+var _require_ai := false
 var _nearby_npc: Node3D
 var _checkpoint := Vector3(0, 0.05, 5)
 
@@ -24,12 +25,16 @@ func _ready() -> void:
     player.health_changed.connect(_on_player_health_changed)
     _on_player_health_changed(player.health, player.max_health)
     player.died.connect(_on_player_died)
+    AIClient.prefetch("merchant_yun", QuestManager.state)
+    AIClient.prefetch("innkeeper_deoksun", QuestManager.state)
     print("JOSEON_OUTLAW_READY phase=%d" % IMPLEMENTED_PHASE)
     for argument in OS.get_cmdline_user_args():
         if argument.begins_with("--smoke-phase="):
             _smoke_phase = int(argument.get_slice("=", 1))
         elif argument.begins_with("--screenshot="):
             _screenshot_path = argument.trim_prefix("--screenshot=")
+        elif argument == "--require-ai":
+            _require_ai = true
     if _smoke_phase > 0:
         call_deferred("_finish_smoke")
 
@@ -69,6 +74,8 @@ func _show_dialogue(line: Dictionary) -> void:
 func _on_quest_state_changed(_previous: String, current: String) -> void:
     _update_objective()
     end_panel.visible = current == QuestManager.COMPLETED
+    AIClient.prefetch("merchant_yun", current)
+    AIClient.prefetch("innkeeper_deoksun", current)
 
 
 func _update_objective() -> void:
@@ -103,6 +110,8 @@ func _finish_smoke() -> void:
     if _smoke_phase >= 4 and not await _smoke_combat():
         return
     if _smoke_phase >= 5 and not await _smoke_complete_run():
+        return
+    if _smoke_phase >= 6 and not await _smoke_ai_dialogue():
         return
     if not _screenshot_path.is_empty():
         await get_tree().process_frame
@@ -263,6 +272,32 @@ func _smoke_complete_run() -> bool:
         _fail_smoke("Quest completion or reward failed")
         return false
     print("COMPLETE_RUN_SMOKE state=%s reward=%d respawn=ok shortcut=ok ai_server=not_required" % [QuestManager.state, QuestManager.reward_nyang])
+    return true
+
+func _smoke_ai_dialogue() -> bool:
+    AIClient.clear_cache()
+    var immediate := AIClient.dialogue("merchant_yun", QuestManager.state, {
+        "speaker": "윤 행수",
+        "text": "큰 은혜를 입었소. 쉰 냥을 잘 쓰시오.",
+    })
+    if immediate.get("source") != "fallback":
+        _fail_smoke("AI client did not provide an immediate fallback")
+        return false
+    var response: Dictionary = {}
+    for frame in 150:
+        await get_tree().process_frame
+        response = AIClient.cached("merchant_yun", QuestManager.state)
+        if not response.is_empty():
+            break
+    if _require_ai and response.is_empty():
+        _fail_smoke("Live AI server response was required but not received")
+        return false
+    var source := "fallback"
+    if not response.is_empty():
+        source = response.get("source", "fallback")
+        response["speaker"] = "윤 행수 · AI"
+        _show_dialogue(response)
+    print("AI_DIALOGUE_SMOKE immediate=fallback server_response=%s timeout_s=2.0 cache=%s" % [source, "hit" if not response.is_empty() else "miss"])
     return true
 
 
