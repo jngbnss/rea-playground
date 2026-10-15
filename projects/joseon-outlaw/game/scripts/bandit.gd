@@ -22,6 +22,7 @@ const DEAD := "dead"
 
 @onready var visual: Node3D = $Visual
 @onready var weapon: MeshInstance3D = $Visual/Weapon
+@onready var human_rig: Node = $Visual/HumanRig
 @onready var state_label: Label3D = $StateLabel
 
 var health := 60
@@ -183,6 +184,7 @@ func _show_state() -> void:
 
 
 func _swing_weapon() -> void:
+    human_rig.animate_attack()
     var tween := create_tween()
     tween.tween_property(weapon, "rotation_degrees:z", -75.0, 0.1)
     tween.tween_property(weapon, "rotation_degrees:z", 10.0, 0.18)

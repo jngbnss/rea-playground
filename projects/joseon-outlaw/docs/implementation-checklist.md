@@ -80,3 +80,17 @@
 - [x] 최종 화면 캡처와 실행 파일 기동 확인
 
 검증: 10/10 연속 완주, Python 52개 테스트, FastAPI→Godot 통합, 표준 런타임 124~145 FPS·정적 메모리 50.6MiB, 109,205,984바이트 Windows 실행 파일 기동을 확인했다. [GitHub Actions Linux 검사·Windows 아티팩트 빌드](https://github.com/jngbnss/rea-playground/actions/runs/38663533894)도 통과했다. 최종 렌더는 [`evidence/game/phase7.png`](evidence/game/phase7.png).
+
+## 실사형 인간 업그레이드
+
+- [x] MakeHuman 공식 core assets의 CC0 조건 확인
+- [x] 동아시아 얼굴·피부·눈·눈썹·머리카락을 포함한 인간 베이스 생성
+- [x] 자연 A-포즈·미터/Z-up·104본 스킨 GLB 변환
+- [x] 플레이어·주민·도적이 한 GLB를 공유하도록 전환
+- [x] 역할별 저고리·두루마기·띠·갓·머리싸개·무기 유지
+- [x] 이동 체중 이동과 플레이어·도적 공격 동작 연결
+- [x] 실게임 OpenGL 렌더에서 얼굴·손·자연 팔 자세 확인
+- [x] 전체 완주·AI 통합·Windows 빌드 회귀 확인
+- [x] 최종 GLB SHA-256·CC0 원장·크레딧 기록
+
+검증: Python 52개 테스트, 페이즈 7 전체 완주, FastAPI→Godot 통합, 독립 GLB 재임포트, Windows 실행 파일 `147,465,048 bytes` 생성·기동이 통과했다. 최종 실게임 렌더는 [`evidence/game/human-realism.png`](evidence/game/human-realism.png).

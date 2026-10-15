@@ -6,14 +6,13 @@ extends Node3D
 @export var accent_color := Color("a5402f")
 
 @onready var name_label: Label3D = $NameLabel
-@onready var body: MeshInstance3D = $Body
 
 
 func _ready() -> void:
     add_to_group("interactable")
     add_to_group("villagers")
     name_label.text = display_name
-    for garment: MeshInstance3D in [$Body, $Robe, $ArmLeft, $ArmRight]:
+    for garment: MeshInstance3D in [$Body, $Robe]:
         var material := garment.material_override.duplicate() as StandardMaterial3D
         material.albedo_color = accent_color
         garment.material_override = material

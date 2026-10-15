@@ -2,6 +2,10 @@
 
 이 파일은 `python -m tools.ledger --credits` 로 생성한다. 직접 고치지 않는다.
 
+## character
+
+- MakeHuman Joseon Male Base — CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/)
+
 ## environment
 
 - Poly Haven Qwantani Dusk 1 Pure Sky HDRI — CC0 1.0 (https://polyhaven.com/license)

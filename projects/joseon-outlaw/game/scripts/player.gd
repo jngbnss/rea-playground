@@ -16,10 +16,7 @@ signal died
 
 @onready var visual: Node3D = $Visual
 @onready var sword: MeshInstance3D = $Visual/Sword
-@onready var left_arm: Node3D = $Visual/ArmLeftPivot
-@onready var right_arm: Node3D = $Visual/ArmRightPivot
-@onready var left_leg: Node3D = $Visual/LegLeftPivot
-@onready var right_leg: Node3D = $Visual/LegRightPivot
+@onready var human_rig: Node = $Visual/HumanRig
 @onready var camera_rig: Node3D = $CameraRig
 @onready var pitch: Node3D = $CameraRig/Pitch
 
@@ -127,6 +124,7 @@ func restore_at(checkpoint: Vector3) -> void:
 
 
 func _animate_attack() -> void:
+    human_rig.animate_attack()
     if _attack_tween != null and _attack_tween.is_valid():
         _attack_tween.kill()
     _attack_tween = create_tween()
@@ -139,16 +137,6 @@ func _set_movement_state(direction: Vector3, sprinting: bool) -> void:
     if next != movement_state:
         movement_state = next
         movement_state_changed.emit(next)
-    var moving := next in ["walk", "run"]
-    var cadence := 0.017 if next == "run" else 0.011
-    var amplitude := 30.0 if next == "run" else 20.0
-    var stride := sin(Time.get_ticks_msec() * cadence) * amplitude if moving else 0.0
-    left_arm.rotation_degrees.x = lerpf(left_arm.rotation_degrees.x, stride, 0.28)
-    right_arm.rotation_degrees.x = lerpf(right_arm.rotation_degrees.x, -stride, 0.28)
-    left_leg.rotation_degrees.x = lerpf(left_leg.rotation_degrees.x, -stride * 0.65, 0.28)
-    right_leg.rotation_degrees.x = lerpf(right_leg.rotation_degrees.x, stride * 0.65, 0.28)
-    var bob := absf(sin(Time.get_ticks_msec() * cadence)) * 0.025 if moving else 0.0
-    visual.position.y = lerpf(visual.position.y, bob, 0.25)
 
 
 func set_test_input(input_vector: Vector2, sprinting := false, jump := false) -> void:
