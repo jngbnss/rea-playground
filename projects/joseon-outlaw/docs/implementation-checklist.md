@@ -58,13 +58,15 @@
 
 ## 페이즈 6 — AI 대화
 
-- [ ] FastAPI 서버와 `/health`, `/v1/dialogue` 구현
-- [ ] 요청·응답 스키마와 정책 검증 연결
-- [ ] 퀘스트 상태별 대사 캐시
-- [ ] Godot HTTP 클라이언트 연결
-- [ ] 2초 타임아웃과 고정 대사 fallback
-- [ ] 서버 중단 상태에서도 완주 가능
-- [ ] AI 통합 스모크 통과
+- [x] FastAPI 서버와 `/health`, `/v1/dialogue` 구현
+- [x] 요청·응답 스키마와 정책 검증 연결
+- [x] 퀘스트 상태별 대사 캐시
+- [x] Godot HTTP 클라이언트 연결
+- [x] 2초 타임아웃과 고정 대사 fallback
+- [x] 서버 중단 상태에서도 완주 가능
+- [x] AI 통합 스모크 통과
+
+검증: 서버 중단 시 즉시 fallback·전체 완주, 실행 시 FastAPI 건강 확인·잘못된 계약 422·검증 대사·Godot 캐시 적중을 확인했다. qwen3:4b-instruct 40문항 실측 결과를 남겼고 품질·VRAM 기준 미달로 자유 입력은 비활성화했다. 렌더 결과는 [`evidence/game/phase6.png`](evidence/game/phase6.png).
 
 ## 페이즈 7 — 완성·배포
 
