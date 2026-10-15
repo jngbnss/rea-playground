@@ -12,10 +12,7 @@ func _ready() -> void:
     add_to_group("interactable")
     add_to_group("villagers")
     name_label.text = display_name
-    for garment: MeshInstance3D in [$Body, $Robe]:
-        var material := garment.material_override.duplicate() as StandardMaterial3D
-        material.albedo_color = accent_color
-        garment.material_override = material
+    $HumanRig.set_clothing_color(accent_color)
 
 
 func prompt() -> String:

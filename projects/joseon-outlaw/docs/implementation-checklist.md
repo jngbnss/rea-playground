@@ -94,3 +94,15 @@
 - [x] 최종 GLB SHA-256·CC0 원장·크레딧 기록
 
 검증: Python 52개 테스트, 페이즈 7 전체 완주, FastAPI→Godot 통합, 독립 GLB 재임포트, Windows 실행 파일 `147,465,048 bytes` 생성·기동이 통과했다. 최종 실게임 렌더는 [`evidence/game/human-realism.png`](evidence/game/human-realism.png).
+
+## 자연스러운 인간 실루엣 재구현
+
+- [x] MakeHuman 의상 재질의 투명도·컬링 문제 확인
+- [x] 사람을 가리던 캡슐 몸통·원통 치마 완전 제거
+- [x] 실제 어깨·허리·팔 치수 기반 저고리·소매·두루마기 GLB 적용
+- [x] 손·발·머리·목이 의상과 자연스럽게 이어지는지 실화면 확인
+- [x] 갓 크기 축소와 환도 칼날·손잡이·코등이 분리
+- [x] 3.25m 근접 카메라에서 플레이어·주민 인체 실루엣 확인
+- [x] Python 52개 테스트·전체 완주·AI 통합·Windows 빌드 통과
+
+검증: OpenGL 실게임 렌더 [`evidence/game/human-natural.png`](evidence/game/human-natural.png)에서 원통형 대체물이 없는 머리·몸통·양팔·양손·양다리·발 실루엣을 확인했다. Windows 실행 파일 `147,534,360 bytes` 생성·기동도 통과했다.

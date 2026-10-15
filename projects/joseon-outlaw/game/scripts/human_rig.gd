@@ -2,6 +2,8 @@ class_name HumanRigController
 extends Node3D
 
 @export var gait_scale := 1.0
+@export var clothing_color := Color("173442")
+@export var sash_color := Color("792a20")
 
 var _body: CharacterBody3D
 var _attack_tween: Tween
@@ -12,6 +14,26 @@ func _ready() -> void:
     while candidate != null and candidate is not CharacterBody3D:
         candidate = candidate.get_parent()
     _body = candidate as CharacterBody3D
+    set_clothing_color(clothing_color)
+
+
+func set_clothing_color(color: Color) -> void:
+    clothing_color = color
+    var material := StandardMaterial3D.new()
+    material.albedo_color = color
+    material.roughness = 0.9
+    material.cull_mode = BaseMaterial3D.CULL_DISABLED
+    material.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+    var underlayer := find_child("male_casualsuit06Mesh", true, false) as MeshInstance3D
+    if underlayer != null:
+        underlayer.material_override = material
+    for node in find_children("Hanbok*", "MeshInstance3D", true, false):
+        var garment := node as MeshInstance3D
+        var garment_material := material
+        if "Sash" in garment.name:
+            garment_material = material.duplicate() as StandardMaterial3D
+            garment_material.albedo_color = sash_color
+        garment.material_override = garment_material
 
 
 func _process(_delta: float) -> void:
