@@ -1,81 +1,53 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
+[ext_resource type="PackedScene" path="res://assets/models/human/joseon_male.glb" id="2_human"]
+[ext_resource type="Script" path="res://scripts/human_rig.gd" id="3_rig"]
 
 [sub_resource type="CapsuleShape3D" id="Shape_player"]
 radius = 0.38
 height = 1.8
-
 [sub_resource type="CapsuleMesh" id="Mesh_torso"]
-radius = 0.31
-height = 0.92
-radial_segments = 20
-rings = 8
+radius = 0.25
+height = 0.7
+radial_segments = 28
+rings = 10
 
-[sub_resource type="SphereMesh" id="Mesh_head"]
-radius = 0.22
-height = 0.48
-radial_segments = 24
-rings = 12
 
-[sub_resource type="CapsuleMesh" id="Mesh_limb"]
-radius = 0.09
-height = 0.62
-radial_segments = 14
-rings = 5
-
-[sub_resource type="SphereMesh" id="Mesh_hand"]
-radius = 0.085
-height = 0.17
-radial_segments = 14
-rings = 6
-
-[sub_resource type="BoxMesh" id="Mesh_foot"]
-size = Vector3(0.22, 0.13, 0.38)
 
 [sub_resource type="CylinderMesh" id="Mesh_robe"]
-top_radius = 0.3
+top_radius = 0.31
 bottom_radius = 0.43
 height = 1.05
-radial_segments = 28
-
-[sub_resource type="CylinderMesh" id="Mesh_neck"]
-top_radius = 0.105
-bottom_radius = 0.12
-height = 0.18
-radial_segments = 16
-
-[sub_resource type="CylinderMesh" id="Mesh_hat"]
-top_radius = 0.5
-bottom_radius = 0.5
-height = 0.025
 radial_segments = 32
 
+[sub_resource type="CylinderMesh" id="Mesh_hat"]
+top_radius = 0.48
+bottom_radius = 0.48
+height = 0.025
+radial_segments = 40
+
 [sub_resource type="CylinderMesh" id="Mesh_crown"]
-top_radius = 0.14
-bottom_radius = 0.2
-height = 0.3
-radial_segments = 24
+top_radius = 0.13
+bottom_radius = 0.19
+height = 0.29
+radial_segments = 32
 
 [sub_resource type="BoxMesh" id="Mesh_sword"]
 size = Vector3(0.055, 0.055, 1.2)
 
 [sub_resource type="StandardMaterial3D" id="Material_cloth"]
-albedo_color = Color(0.13, 0.24, 0.3, 1)
-roughness = 0.92
-
-[sub_resource type="StandardMaterial3D" id="Material_skin"]
-albedo_color = Color(0.64, 0.43, 0.3, 1)
-roughness = 0.82
+albedo_color = Color(0.075, 0.16, 0.205, 1)
+roughness = 0.86
 
 [sub_resource type="StandardMaterial3D" id="Material_dark"]
-albedo_color = Color(0.035, 0.032, 0.029, 1)
+albedo_color = Color(0.022, 0.02, 0.018, 1)
 metallic = 0.08
-roughness = 0.75
+roughness = 0.72
 
 [sub_resource type="StandardMaterial3D" id="Material_sash"]
-albedo_color = Color(0.36, 0.16, 0.12, 1)
-roughness = 0.88
+albedo_color = Color(0.38, 0.12, 0.085, 1)
+roughness = 0.84
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_player")
@@ -86,14 +58,21 @@ shape = SubResource("Shape_player")
 
 [node name="Visual" type="Node3D" parent="."]
 
+[node name="HumanRig" type="Node3D" parent="Visual"]
+script = ExtResource("3_rig")
+
+[node name="Model" parent="Visual/HumanRig" instance=ExtResource("2_human")]
+scale = Vector3(1.055, 1.055, 1.055)
 [node name="Torso" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.2, 0)
-scale = Vector3(1, 1, 0.78)
+position = Vector3(0, 1.31, 0)
+scale = Vector3(1, 1, 0.72)
 mesh = SubResource("Mesh_torso")
 material_override = SubResource("Material_cloth")
 
+
+
 [node name="Robe" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 0.62, 0)
+position = Vector3(0, 0.63, 0)
 scale = Vector3(1, 1, 0.82)
 mesh = SubResource("Mesh_robe")
 material_override = SubResource("Material_cloth")
@@ -104,80 +83,13 @@ scale = Vector3(1.04, 0.12, 0.84)
 mesh = SubResource("Mesh_robe")
 material_override = SubResource("Material_sash")
 
-[node name="Neck" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.67, 0)
-mesh = SubResource("Mesh_neck")
-material_override = SubResource("Material_skin")
-
-[node name="Head" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 1.89, 0)
-scale = Vector3(0.9, 1.0, 0.86)
-mesh = SubResource("Mesh_head")
-material_override = SubResource("Material_skin")
-
-[node name="ArmLeftPivot" type="Node3D" parent="Visual"]
-position = Vector3(-0.36, 1.42, 0)
-rotation_degrees = Vector3(0, 0, -7)
-
-[node name="Sleeve" type="MeshInstance3D" parent="Visual/ArmLeftPivot"]
-position = Vector3(0, -0.29, 0)
-scale = Vector3(1.25, 1, 1.05)
-mesh = SubResource("Mesh_limb")
-material_override = SubResource("Material_cloth")
-
-[node name="Hand" type="MeshInstance3D" parent="Visual/ArmLeftPivot"]
-position = Vector3(0, -0.63, 0)
-mesh = SubResource("Mesh_hand")
-material_override = SubResource("Material_skin")
-
-[node name="ArmRightPivot" type="Node3D" parent="Visual"]
-position = Vector3(0.36, 1.42, 0)
-rotation_degrees = Vector3(0, 0, 7)
-
-[node name="Sleeve" type="MeshInstance3D" parent="Visual/ArmRightPivot"]
-position = Vector3(0, -0.29, 0)
-scale = Vector3(1.25, 1, 1.05)
-mesh = SubResource("Mesh_limb")
-material_override = SubResource("Material_cloth")
-
-[node name="Hand" type="MeshInstance3D" parent="Visual/ArmRightPivot"]
-position = Vector3(0, -0.63, 0)
-mesh = SubResource("Mesh_hand")
-material_override = SubResource("Material_skin")
-
-[node name="LegLeftPivot" type="Node3D" parent="Visual"]
-position = Vector3(-0.17, 0.42, 0)
-
-[node name="Leg" type="MeshInstance3D" parent="Visual/LegLeftPivot"]
-position = Vector3(0, -0.2, 0)
-mesh = SubResource("Mesh_limb")
-material_override = SubResource("Material_dark")
-
-[node name="Foot" type="MeshInstance3D" parent="Visual/LegLeftPivot"]
-position = Vector3(0, -0.48, -0.09)
-mesh = SubResource("Mesh_foot")
-material_override = SubResource("Material_dark")
-
-[node name="LegRightPivot" type="Node3D" parent="Visual"]
-position = Vector3(0.17, 0.42, 0)
-
-[node name="Leg" type="MeshInstance3D" parent="Visual/LegRightPivot"]
-position = Vector3(0, -0.2, 0)
-mesh = SubResource("Mesh_limb")
-material_override = SubResource("Material_dark")
-
-[node name="Foot" type="MeshInstance3D" parent="Visual/LegRightPivot"]
-position = Vector3(0, -0.48, -0.09)
-mesh = SubResource("Mesh_foot")
-material_override = SubResource("Material_dark")
-
 [node name="HatBrim" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 2.13, 0)
+position = Vector3(0, 1.76, 0)
 mesh = SubResource("Mesh_hat")
 material_override = SubResource("Material_dark")
 
 [node name="HatCrown" type="MeshInstance3D" parent="Visual"]
-position = Vector3(0, 2.28, 0)
+position = Vector3(0, 1.9, 0)
 mesh = SubResource("Mesh_crown")
 material_override = SubResource("Material_dark")
 
@@ -194,7 +106,7 @@ position = Vector3(0, 1.48, 0)
 rotation_degrees = Vector3(-13, 0, 0)
 
 [node name="SpringArm3D" type="SpringArm3D" parent="CameraRig/Pitch"]
-spring_length = 5.8
+spring_length = 4.6
 margin = 0.15
 collision_mask = 1
 

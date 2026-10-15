@@ -1,8 +1,8 @@
 # JOSEON OUTLAW
 
-Godot 4.7.2로 구현한 3인칭 조선 활극 수직 슬라이스. 윤 행수의 장부 의뢰를 받아 산길의 도적 둘을 제압하고 장부를 되찾아 보상받는 흐름을 처음부터 끝까지 플레이할 수 있다. 자체 절차 생성 메시와 CC0 PBR·HDRI 오픈소스 자산을 사용한다.
+Godot 4.7.2로 구현한 3인칭 조선 활극 수직 슬라이스. 윤 행수의 장부 의뢰를 받아 산길의 도적 둘을 제압하고 장부를 되찾아 보상받는 흐름을 처음부터 끝까지 플레이할 수 있다. CC0 MakeHuman 실사형 인간 베이스와 CC0 PBR·HDRI 오픈소스 자산을 사용한다.
 
-![조선 아웃로우 인물·UI 개선 실게임](docs/evidence/game/character-realism.png)
+![조선 아웃로우 실사형 인간·조선 복식 실게임](docs/evidence/game/human-realism.png)
 
 ## 자동 검사와 미리보기
 
@@ -11,7 +11,7 @@ Godot 4.7.2로 구현한 3인칭 조선 활극 수직 슬라이스. 윤 행수�
 
 ## 구현 범위
 
-- 관절형 팔·다리·손·발과 두루마기·갓을 갖춘 플레이어·주민·도적, 보행 팔·다리 스윙
+- CC0 MakeHuman 얼굴·피부·눈·머리·손을 갖춘 플레이어·주민·도적과 직접 구성한 저고리·두루마기·갓·무기
 - CC0 PBR 지면·흙길·회벽·목재·기와와 해 질 녘 HDRI를 적용한 조선 마을·산길·도적 소굴
 - Song Myung·Gowun Batang 기반 먹색 HUD와 한지 의뢰서·대화창
 - 의뢰 수락·장부 회수·지름길·제출·보상·엔딩, 체크포인트 부활
@@ -55,7 +55,7 @@ AI 대사는 선택 기능이다. `ollama serve`와 `qwen3:4b-instruct`를 준�
 
 에디터에서는 `game/project.godot`을 연다. 기준 PC와 도구 버전은 [`docs/environment.md`](docs/environment.md), 단계별 완료 기준은 [`docs/implementation-checklist.md`](docs/implementation-checklist.md), 구현 중 오류는 [`docs/implementation-errors.md`](docs/implementation-errors.md)에 기록한다.
 
-외부 서체 라이선스와 고지는 [`CREDITS.md`](CREDITS.md), 원본 해시·승인 상태는 [`data/license-ledger.csv`](data/license-ledger.csv)에 있다.
+외부 인간 모델·서체·환경 자산의 라이선스와 고지는 [`CREDITS.md`](CREDITS.md), 원본 해시·승인 상태는 [`data/license-ledger.csv`](data/license-ledger.csv)에 있다.
 
 ## 11. AI 계약 요약
 
