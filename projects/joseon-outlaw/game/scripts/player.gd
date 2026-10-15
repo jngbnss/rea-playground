@@ -103,6 +103,7 @@ func _ensure_input_actions() -> void:
         &"move_back": KEY_S,
         &"sprint": KEY_SHIFT,
         &"jump": KEY_SPACE,
+        &"interact": KEY_E,
         &"toggle_mouse": KEY_ESCAPE,
     }
     for action: StringName in actions:

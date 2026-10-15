@@ -1,7 +1,9 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
+[ext_resource type="Script" path="res://scripts/world.gd" id="3_world"]
+[ext_resource type="PackedScene" path="res://scenes/npc.tscn" id="4_npc"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -9,16 +11,19 @@ background_color = Color(0.36, 0.55, 0.65, 1)
 ambient_light_source = 3
 ambient_light_color = Color(0.72, 0.68, 0.58, 1)
 ambient_light_energy = 0.7
+fog_enabled = true
+fog_light_color = Color(0.62, 0.68, 0.66, 1)
+fog_density = 0.003
 
 [sub_resource type="PlaneMesh" id="Plane_ground"]
-size = Vector2(40, 40)
+size = Vector2(60, 140)
 
 [sub_resource type="StandardMaterial3D" id="Material_ground"]
 albedo_color = Color(0.22, 0.31, 0.18, 1)
 roughness = 1.0
 
 [sub_resource type="BoxShape3D" id="Shape_ground"]
-size = Vector3(40, 0.2, 40)
+size = Vector3(60, 0.2, 140)
 
 [sub_resource type="BoxMesh" id="Mesh_wall"]
 size = Vector3(5, 2.5, 0.4)
@@ -41,6 +46,18 @@ corner_radius_top_left = 6
 corner_radius_top_right = 6
 corner_radius_bottom_right = 6
 corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="Scroll_style"]
+bg_color = Color(0.945, 0.906, 0.827, 0.96)
+border_width_left = 5
+border_width_top = 2
+border_width_right = 5
+border_width_bottom = 2
+border_color = Color(0.16, 0.14, 0.12, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
@@ -74,25 +91,92 @@ material_override = SubResource("Material_wall")
 [node name="Collision" type="CollisionShape3D" parent="CameraWall"]
 shape = SubResource("Shape_wall")
 
+[node name="World" type="Node3D" parent="."]
+script = ExtResource("3_world")
+
+[node name="MerchantYun" parent="World" instance=ExtResource("4_npc")]
+position = Vector3(-3.5, 0, 3)
+npc_id = "merchant_yun"
+display_name = "윤 행수"
+accent_color = Color(0.647, 0.251, 0.184, 1)
+
+[node name="InnkeeperDeoksun" parent="World" instance=ExtResource("4_npc")]
+position = Vector3(4.5, 0, -4)
+npc_id = "innkeeper_deoksun"
+display_name = "덕순 주모"
+accent_color = Color(0.18, 0.35, 0.4, 1)
+
 [node name="Player" parent="." instance=ExtResource("2_player")]
-position = Vector3(0, 0.05, 6)
+position = Vector3(0, 0.05, 8)
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="Panel" type="PanelContainer" parent="UI"]
-offset_left = 36.0
-offset_top = 36.0
-offset_right = 520.0
-offset_bottom = 164.0
+[node name="HelpPanel" type="PanelContainer" parent="UI"]
+offset_left = 28.0
+offset_top = 28.0
+offset_right = 468.0
+offset_bottom = 126.0
 theme_override_styles/panel = SubResource("Panel_style")
 
-[node name="Margin" type="MarginContainer" parent="UI/Panel"]
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 14
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 14
+[node name="Margin" type="MarginContainer" parent="UI/HelpPanel"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 10
 
-[node name="Text" type="Label" parent="UI/Panel/Margin"]
-text = "JOSEON OUTLAW · 플레이어 수직 슬라이스\nWASD 이동  ·  Shift 달리기  ·  Space 점프\n마우스 카메라  ·  Esc 커서 전환"
+[node name="Text" type="Label" parent="UI/HelpPanel/Margin"]
+text = "WASD 이동 · Shift 달리기 · Space 점프\nE 대화 · 마우스 카메라 · Esc 커서"
 theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 17
+
+[node name="ObjectivePanel" type="PanelContainer" parent="UI"]
+offset_left = 830.0
+offset_top = 28.0
+offset_right = 1250.0
+offset_bottom = 134.0
+theme_override_styles/panel = SubResource("Scroll_style")
+
+[node name="Margin" type="MarginContainer" parent="UI/ObjectivePanel"]
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 12
+
+[node name="Objective" type="Label" parent="UI/ObjectivePanel/Margin"]
+text = "의뢰 · 윤 행수와 이야기하시오"
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
+theme_override_font_sizes/font_size = 19
+
+[node name="Prompt" type="Label" parent="UI"]
+offset_left = 440.0
+offset_top = 584.0
+offset_right = 840.0
+offset_bottom = 626.0
+text = ""
+horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 22
+
+[node name="Dialogue" type="PanelContainer" parent="UI"]
+visible = false
+offset_left = 190.0
+offset_top = 510.0
+offset_right = 1090.0
+offset_bottom = 688.0
+theme_override_styles/panel = SubResource("Panel_style")
+
+[node name="Margin" type="MarginContainer" parent="UI/Dialogue"]
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 18
+
+[node name="Text" type="Label" parent="UI/Dialogue/Margin"]
+text = "윤 행수\n대화 내용"
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
+theme_override_font_sizes/font_size = 22
