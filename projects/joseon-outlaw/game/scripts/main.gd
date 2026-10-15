@@ -7,8 +7,10 @@ const INTERACTION_RANGE := 3.0
 @onready var objective_label: Label = $UI/ObjectivePanel/Margin/Objective
 @onready var prompt_label: Label = $UI/Prompt
 @onready var dialogue_panel: PanelContainer = $UI/Dialogue
-@onready var dialogue_text: Label = $UI/Dialogue/Margin/Text
-@onready var health_label: Label = $UI/HealthPanel/Margin/Health
+@onready var dialogue_speaker: Label = $UI/Dialogue/Margin/Stack/Speaker
+@onready var dialogue_text: Label = $UI/Dialogue/Margin/Stack/Text
+@onready var health_label: Label = $UI/HealthPanel/Margin/Stack/Health
+@onready var health_bar: ProgressBar = $UI/HealthPanel/Margin/Stack/HealthBar
 @onready var end_panel: PanelContainer = $UI/EndPanel
 @onready var tutorial_panel: PanelContainer = $UI/TutorialPanel
 @onready var pause_panel: PanelContainer = $UI/PausePanel
@@ -94,7 +96,8 @@ func _find_nearest_npc() -> Node3D:
 
 
 func _show_dialogue(line: Dictionary) -> void:
-    dialogue_text.text = "%s\n%s" % [line.get("speaker", ""), line.get("text", "")]
+    dialogue_speaker.text = line.get("speaker", "")
+    dialogue_text.text = line.get("text", "")
     dialogue_panel.show()
     _update_objective()
 
@@ -110,7 +113,9 @@ func _update_objective() -> void:
     objective_label.text = "의뢰 · %s" % QuestManager.objective()
 
 func _on_player_health_changed(current: int, maximum: int) -> void:
-    health_label.text = "체력 %d / %d" % [current, maximum]
+    health_label.text = "생명 %d / %d" % [current, maximum]
+    health_bar.max_value = maximum
+    health_bar.value = current
 
 func _on_player_died() -> void:
     health_label.text = "쓰러짐 · 체크포인트로 귀환"
@@ -143,6 +148,8 @@ func _finish_smoke() -> void:
         return
     if _smoke_phase >= 7 and not _smoke_polish():
         return
+    if not _screenshot_path.is_empty():
+        _prepare_showcase()
     if not _screenshot_path.is_empty():
         await get_tree().process_frame
         await get_tree().process_frame
@@ -327,10 +334,21 @@ func _smoke_ai_dialogue() -> bool:
     var source := "fallback"
     if not response.is_empty():
         source = response.get("source", "fallback")
-        response["speaker"] = "윤 행수 · AI"
+        response["speaker"] = "윤 행수"
         _show_dialogue(response)
     print("AI_DIALOGUE_SMOKE immediate=fallback server_response=%s timeout_s=2.0 cache=%s" % [source, "hit" if not response.is_empty() else "miss"])
     return true
+
+
+func _prepare_showcase() -> void:
+    QuestManager.reset()
+    player.restore_at(Vector3(0, 0.05, 8))
+    player.rotation_degrees = Vector3.ZERO
+    dialogue_panel.hide()
+    end_panel.hide()
+    tutorial_panel.hide()
+    pause_panel.hide()
+    prompt_label.text = ""
 
 func _smoke_polish() -> bool:
     if tutorial_panel == null or pause_panel == null or _ambient_player == null or _ambient_player.stream == null:

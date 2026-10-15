@@ -1,13 +1,11 @@
 # 06. UI 시안과 서체
 
-> 상태: 시안 v1. 목업: [`ui-mockup/index.html`](../ui-mockup/index.html) (브라우저로 열기), 스크린샷: [`img/ui-mockup.png`](img/ui-mockup.png)
-> 검사: `tests/test_ui_mockup.py` (팔레트 토큰 일치, 팔레트 밖 색 사용 금지, 제목 서체 글리프 범위, 대사가 정책 데이터와 일치)
+> 상태: **실게임 UI v2 적용 완료.** 목업: [`ui-mockup/index.html`](../ui-mockup/index.html), 실게임: [`evidence/game/design-upgrade.png`](evidence/game/design-upgrade.png)
+> 검사: `tests/test_ui_mockup.py`와 페이즈 7 Godot 스모크
 
-![UI 목업](img/ui-mockup.png)
+![실게임 UI](evidence/game/design-upgrade.png)
 
-배경은 게임 화면 자리 표시용 SVG다. 아트 디렉션(02번)의 해 질 녘 색과 대기 원근을 미리 보여 주려고 넣었다.
-
-> 스크린샷은 `word-break: keep-all` 적용 **직전**에 찍었다. 그래서 퀘스트 두루마리의 "장부/를"이 어절 중간에서 줄바뀜되어 있다. HTML은 수정되었고, 작업 PC의 헤드리스 크롬이 계속 시간 초과로 끝나서 다시 찍지 못했다. 브라우저로 `ui-mockup/index.html`을 직접 열면 수정된 상태를 볼 수 있다.
+Song Myung과 Gowun Batang 원본 TTF·OFL을 빌드에 포함했다. 먹색 HUD, 한지 의뢰서, 붓색 체력 바, 분리된 이름표·대화 본문, 타이틀·엔딩·일시정지 패널을 실제 Godot 화면에 적용했다.
 
 ## 1. 서체
 
@@ -41,16 +39,15 @@
 - `word-break: keep-all`처럼 **어절 단위로 줄을 바꾼다.** Godot `Label`·`RichTextLabel`에서는 `autowrap_mode = AUTOWRAP_WORD_SMART`로 확인한다.
 - 화면에 "AI"라는 표시를 하지 않는다. AI 대사와 고정 대사가 플레이어에게 똑같이 보여야 몰입이 깨지지 않는다.
 
-## 4. Godot 구현 메모
+## 4. Godot 구현
 
-- `Theme` 리소스 하나에 팔레트와 서체를 모은다. 색은 `palette.json`에서 생성하는 스크립트를 1주차에 만든다(손으로 옮겨 적지 않는다).
-- 대화창은 `PanelContainer` + `StyleBoxFlat`(배경, 위쪽 테두리) + 모서리 꺾쇠 `TextureRect` 4개로 만든다.
-- 체력 바의 붓질 모양은 `TextureProgressBar`에 붓 질감 텍스처를 넣어 만든다.
-- 두루마리와 도장은 9-patch 텍스처로 만든다.
+- `main.tscn`이 팔레트 기반 `StyleBoxFlat`과 두 OFL 서체를 직접 연결한다.
+- 고정 제목·이름표는 Song Myung, 가변 목표·대사 본문은 완성형 한글을 지원하는 Gowun Batang을 사용한다.
+- 체력은 숫자와 `ProgressBar`가 같은 상태 신호를 구독한다. 대화창은 이름과 본문을 별도 Label로 렌더링한다.
+- 실게임 화면 어디에도 AI 출처를 노출하지 않는다.
 
 ## 5. 다음 시안에서 할 것
 
-- 선택지 3개 이상일 때, 대사가 3줄일 때의 레이아웃
+- 선택지 3개 이상일 때와 대사 3줄일 때의 레이아웃
 - 피격 시 화면 가장자리 붉은 비네트(`hp_red`, 0.2초)
-- 엔딩 카드와 타이틀 화면
-- 실제 게임 화면 스크린샷 위에 다시 맞춰 보기 (3주차 뷰티 코너)
+- 의뢰 목표 변경 애니메이션과 스팅
