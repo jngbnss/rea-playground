@@ -1,6 +1,6 @@
 extends Node3D
 
-const IMPLEMENTED_PHASE := 4
+const IMPLEMENTED_PHASE := 5
 const INTERACTION_RANGE := 3.0
 
 @onready var player: PlayerController = $Player
@@ -9,10 +9,12 @@ const INTERACTION_RANGE := 3.0
 @onready var dialogue_panel: PanelContainer = $UI/Dialogue
 @onready var dialogue_text: Label = $UI/Dialogue/Margin/Text
 @onready var health_label: Label = $UI/HealthPanel/Margin/Health
+@onready var end_panel: PanelContainer = $UI/EndPanel
 
 var _smoke_phase := 0
 var _screenshot_path := ""
 var _nearby_npc: Node3D
+var _checkpoint := Vector3(0, 0.05, 5)
 
 
 func _ready() -> void:
@@ -21,6 +23,7 @@ func _ready() -> void:
     _update_objective()
     player.health_changed.connect(_on_player_health_changed)
     _on_player_health_changed(player.health, player.max_health)
+    player.died.connect(_on_player_died)
     print("JOSEON_OUTLAW_READY phase=%d" % IMPLEMENTED_PHASE)
     for argument in OS.get_cmdline_user_args():
         if argument.begins_with("--smoke-phase="):
@@ -63,8 +66,9 @@ func _show_dialogue(line: Dictionary) -> void:
     _update_objective()
 
 
-func _on_quest_state_changed(_previous: String, _current: String) -> void:
+func _on_quest_state_changed(_previous: String, current: String) -> void:
     _update_objective()
+    end_panel.visible = current == QuestManager.COMPLETED
 
 
 func _update_objective() -> void:
@@ -72,6 +76,12 @@ func _update_objective() -> void:
 
 func _on_player_health_changed(current: int, maximum: int) -> void:
     health_label.text = "체력 %d / %d" % [current, maximum]
+
+func _on_player_died() -> void:
+    health_label.text = "쓰러짐 · 체크포인트로 귀환"
+    await get_tree().create_timer(0.4).timeout
+    player.restore_at(_checkpoint)
+
 
 
 
@@ -91,6 +101,8 @@ func _finish_smoke() -> void:
     if _smoke_phase >= 3 and not _smoke_quest():
         return
     if _smoke_phase >= 4 and not await _smoke_combat():
+        return
+    if _smoke_phase >= 5 and not await _smoke_complete_run():
         return
     if not _screenshot_path.is_empty():
         await get_tree().process_frame
@@ -147,7 +159,7 @@ func _smoke_player(camera: Camera3D) -> bool:
 func _smoke_quest() -> bool:
     var merchant := get_node_or_null("World/MerchantYun")
     var innkeeper := get_node_or_null("World/InnkeeperDeoksun")
-    if merchant == null or innkeeper == null or get_tree().get_nodes_in_group("interactable").size() != 2:
+    if merchant == null or innkeeper == null or get_tree().get_nodes_in_group("villagers").size() != 2:
         _fail_smoke("Village NPCs are missing")
         return false
     if get_node_or_null("World/Path00") == null or get_node_or_null("World/CampPlatform") == null:
@@ -208,6 +220,49 @@ func _smoke_combat() -> bool:
         _fail_smoke("Sword damage sequence failed: hits=%d health=%d state=%s" % [total_hits, bandit_a.health, bandit_a.state])
         return false
     print("COMBAT_SMOKE hits=%d enemy_health=%d state=%s token_max=%d player_health=%d" % [total_hits, bandit_a.health, bandit_a.state, CombatCoordinator.max_concurrent_attackers, player.health])
+    return true
+
+func _smoke_complete_run() -> bool:
+    var merchant := get_node_or_null("World/MerchantYun")
+    var chest := get_node_or_null("World/LedgerChest")
+    var shortcut := get_node_or_null("World/VillageShortcut")
+    var bandit_a := get_node_or_null("World/BanditA") as BanditController
+    var bandit_b := get_node_or_null("World/BanditB") as BanditController
+    if merchant == null or chest == null or shortcut == null or bandit_a == null or bandit_b == null:
+        _fail_smoke("Complete-run objects are missing")
+        return false
+
+    player.restore_at(Vector3(0, 0.05, -20))
+    player.receive_damage(player.max_health)
+    for frame in 30:
+        await get_tree().physics_frame
+    if player.is_dead or player.health != player.max_health or player.global_position.distance_to(_checkpoint) > 0.2:
+        _fail_smoke("Checkpoint respawn failed")
+        return false
+
+    QuestManager.reset()
+    merchant.call("interact")
+    bandit_a.reset_combat(Vector3(-2, 0.05, -46))
+    bandit_b.reset_combat(Vector3(3, 0.05, -50))
+    bandit_a.take_damage(bandit_a.max_health, player)
+    bandit_b.take_damage(bandit_b.max_health, player)
+    var chest_line: Dictionary = chest.call("interact")
+    _show_dialogue(chest_line)
+    if QuestManager.state != QuestManager.ITEM_RECOVERED:
+        _fail_smoke("Ledger could not be recovered after defeating bandits")
+        return false
+    player.global_position = shortcut.global_position
+    var shortcut_line: Dictionary = shortcut.call("interact")
+    _show_dialogue(shortcut_line)
+    if player.global_position.distance_to(_checkpoint) > 0.2:
+        _fail_smoke("Village shortcut did not return the player")
+        return false
+    var completion_line: Dictionary = merchant.call("interact")
+    _show_dialogue(completion_line)
+    if QuestManager.state != QuestManager.COMPLETED or QuestManager.reward_nyang != 50 or not end_panel.visible:
+        _fail_smoke("Quest completion or reward failed")
+        return false
+    print("COMPLETE_RUN_SMOKE state=%s reward=%d respawn=ok shortcut=ok ai_server=not_required" % [QuestManager.state, QuestManager.reward_nyang])
     return true
 
 
