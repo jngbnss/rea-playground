@@ -69,10 +69,10 @@ class BanditCombat(unittest.TestCase):
 class Villager(unittest.TestCase):
     villager = load_json("data/npc_fsm.json")["machines"]["villager"]
 
-    def test_prefetch_happens_before_talking(self):
+    def test_dialogue_is_prepared_before_talking(self):
         for t in self.villager["transitions"]:
             if t["to"] == "notice" and t["from"] != "talking":
-                self.assertIn("prefetch_dialogue", t.get("effects", []), t)
+                self.assertIn("prepare_dialogue", t.get("effects", []), t)
         history = replay(self.villager, ["player_near", "interact", "dialogue_closed", "player_left", "reached_point"])
         self.assertEqual(history, ["idle", "notice", "talking", "notice", "returning", "idle"])
 

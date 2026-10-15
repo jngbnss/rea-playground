@@ -49,7 +49,7 @@
       ]
     },
     "villager": {
-      "description": "윤 행수, 덕순 주모 공용. 플레이어가 다가오면 대사를 미리 요청(prefetch)해 체감 지연을 숨긴다.",
+      "description": "윤 행수, 덕순 주모 공용. 퀘스트 상태별 대사 캐시를 우선 사용하고 없을 때만 제한 시간 요청을 시작한다.",
       "initial": "idle",
       "terminal": [],
       "params": {
@@ -60,20 +60,20 @@
       "states": {
         "idle":       { "anim": "idle_work",  "note": "자기 일(물건 정리, 국 젓기)을 한다." },
         "wander":     { "anim": "walk",       "note": "가게 주변 2~3개 지점만 오간다." },
-        "notice":     { "anim": "turn_head",  "note": "플레이어 쪽으로 고개를 돌린다. 이 순간 AI 대사 prefetch 요청." },
+        "notice":     { "anim": "turn_head",  "note": "상태별 대사 캐시를 확인하고 없을 때만 2초 제한 요청." },
         "talking":    { "anim": "talk",       "note": "대화창 열림. emotion 값으로 표정·제스처 선택." },
         "returning":  { "anim": "walk",       "note": "원래 자리로 돌아간다." }
       },
       "transitions": [
         { "from": "idle",      "event": "wander_timer",    "to": "wander" },
         { "from": "wander",    "event": "reached_point",   "to": "idle" },
-        { "from": "idle",      "event": "player_near",     "to": "notice", "effects": ["prefetch_dialogue"] },
-        { "from": "wander",    "event": "player_near",     "to": "notice", "effects": ["prefetch_dialogue"] },
+        { "from": "idle",      "event": "player_near",     "to": "notice", "effects": ["prepare_dialogue"] },
+        { "from": "wander",    "event": "player_near",     "to": "notice", "effects": ["prepare_dialogue"] },
         { "from": "notice",    "event": "player_left",     "to": "returning" },
         { "from": "notice",    "event": "interact",        "to": "talking" },
         { "from": "talking",   "event": "dialogue_closed", "to": "notice" },
         { "from": "returning", "event": "reached_point",   "to": "idle" },
-        { "from": "returning", "event": "player_near",     "to": "notice", "effects": ["prefetch_dialogue"] }
+        { "from": "returning", "event": "player_near",     "to": "notice", "effects": ["prepare_dialogue"] }
       ]
     }
   }
