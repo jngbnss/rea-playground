@@ -1,95 +1,129 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/npc.gd" id="1_npc"]
 
 [sub_resource type="CapsuleMesh" id="Mesh_body"]
-radius = 0.38
-height = 1.35
-
-[sub_resource type="SphereMesh" id="Mesh_head"]
-radius = 0.27
-height = 0.54
-
+radius = 0.3
+height = 0.88
+radial_segments = 18
+rings = 7
 
 [sub_resource type="CylinderMesh" id="Mesh_robe"]
-top_radius = 0.3
-bottom_radius = 0.46
+top_radius = 0.29
+bottom_radius = 0.42
 height = 1.0
-radial_segments = 18
+radial_segments = 24
 
 [sub_resource type="CapsuleMesh" id="Mesh_arm"]
-radius = 0.09
-height = 0.72
-radial_segments = 10
+radius = 0.085
+height = 0.6
+radial_segments = 12
 rings = 4
 
-[sub_resource type="BoxMesh" id="Mesh_foot"]
-size = Vector3(0.2, 0.11, 0.34)
-[sub_resource type="StandardMaterial3D" id="Material_body"]
-albedo_color = Color(0.65, 0.25, 0.18, 1)
-roughness = 0.9
+[sub_resource type="SphereMesh" id="Mesh_hand"]
+radius = 0.08
+height = 0.16
+radial_segments = 12
+rings = 5
 
-[sub_resource type="StandardMaterial3D" id="Material_skin"]
-albedo_color = Color(0.72, 0.53, 0.39, 1)
-roughness = 0.8
+[sub_resource type="BoxMesh" id="Mesh_foot"]
+size = Vector3(0.21, 0.12, 0.34)
+
+[sub_resource type="SphereMesh" id="Mesh_head"]
+radius = 0.215
+height = 0.46
+radial_segments = 22
+rings = 10
+
+[sub_resource type="CylinderMesh" id="Mesh_neck"]
+top_radius = 0.1
+bottom_radius = 0.115
+height = 0.17
+radial_segments = 14
 
 [sub_resource type="CylinderMesh" id="Mesh_hat"]
-top_radius = 0.43
-bottom_radius = 0.43
-height = 0.08
-radial_segments = 16
+top_radius = 0.39
+bottom_radius = 0.39
+height = 0.045
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Material_body"]
+albedo_color = Color(0.65, 0.25, 0.18, 1)
+roughness = 0.92
+
+[sub_resource type="StandardMaterial3D" id="Material_skin"]
+albedo_color = Color(0.64, 0.43, 0.3, 1)
+roughness = 0.82
 
 [sub_resource type="StandardMaterial3D" id="Material_hat"]
-albedo_color = Color(0.06, 0.05, 0.04, 1)
-roughness = 0.85
+albedo_color = Color(0.035, 0.032, 0.029, 1)
+roughness = 0.8
 
 [node name="Npc" type="Node3D"]
 script = ExtResource("1_npc")
 
 [node name="Body" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.76, 0)
+position = Vector3(0, 1.12, 0)
+scale = Vector3(1, 1, 0.8)
 mesh = SubResource("Mesh_body")
 material_override = SubResource("Material_body")
 
 [node name="Robe" type="MeshInstance3D" parent="."]
-position = Vector3(0, 0.5, 0)
+position = Vector3(0, 0.56, 0)
+scale = Vector3(1, 1, 0.82)
 mesh = SubResource("Mesh_robe")
 material_override = SubResource("Material_body")
 
 [node name="ArmLeft" type="MeshInstance3D" parent="."]
-position = Vector3(-0.43, 1.02, 0)
+position = Vector3(-0.37, 1.13, 0)
 rotation_degrees = Vector3(0, 0, -8)
 mesh = SubResource("Mesh_arm")
 material_override = SubResource("Material_body")
 
 [node name="ArmRight" type="MeshInstance3D" parent="."]
-position = Vector3(0.43, 1.02, 0)
+position = Vector3(0.37, 1.13, 0)
 rotation_degrees = Vector3(0, 0, 8)
 mesh = SubResource("Mesh_arm")
 material_override = SubResource("Material_body")
 
+[node name="HandLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-0.41, 0.79, 0)
+mesh = SubResource("Mesh_hand")
+material_override = SubResource("Material_skin")
+
+[node name="HandRight" type="MeshInstance3D" parent="."]
+position = Vector3(0.41, 0.79, 0)
+mesh = SubResource("Mesh_hand")
+material_override = SubResource("Material_skin")
+
 [node name="FootLeft" type="MeshInstance3D" parent="."]
-position = Vector3(-0.19, 0.07, -0.04)
+position = Vector3(-0.18, 0.07, -0.05)
 mesh = SubResource("Mesh_foot")
 material_override = SubResource("Material_hat")
 
 [node name="FootRight" type="MeshInstance3D" parent="."]
-position = Vector3(0.19, 0.07, -0.04)
+position = Vector3(0.18, 0.07, -0.05)
 mesh = SubResource("Mesh_foot")
 material_override = SubResource("Material_hat")
 
-[node name="Head" type="MeshInstance3D" parent="."]
+[node name="Neck" type="MeshInstance3D" parent="."]
 position = Vector3(0, 1.55, 0)
+mesh = SubResource("Mesh_neck")
+material_override = SubResource("Material_skin")
+
+[node name="Head" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.76, 0)
+scale = Vector3(0.92, 1, 0.87)
 mesh = SubResource("Mesh_head")
 material_override = SubResource("Material_skin")
 
 [node name="Hat" type="MeshInstance3D" parent="."]
-position = Vector3(0, 1.84, 0)
+position = Vector3(0, 1.99, 0)
 mesh = SubResource("Mesh_hat")
 material_override = SubResource("Material_hat")
 
 [node name="NameLabel" type="Label3D" parent="."]
-position = Vector3(0, 2.25, 0)
+position = Vector3(0, 2.28, 0)
 text = "NPC"
 font_size = 28
 outline_size = 6
