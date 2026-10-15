@@ -1,0 +1,76 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/bandit.gd" id="1_bandit"]
+
+[sub_resource type="CapsuleShape3D" id="Shape_bandit"]
+radius = 0.38
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="Mesh_body"]
+radius = 0.37
+height = 1.35
+
+[sub_resource type="SphereMesh" id="Mesh_head"]
+radius = 0.25
+height = 0.5
+
+[sub_resource type="CylinderMesh" id="Mesh_wrap"]
+top_radius = 0.28
+bottom_radius = 0.32
+height = 0.26
+radial_segments = 12
+
+[sub_resource type="BoxMesh" id="Mesh_weapon"]
+size = Vector3(0.08, 0.08, 1.15)
+
+[sub_resource type="StandardMaterial3D" id="Material_cloth"]
+albedo_color = Color(0.30, 0.15, 0.12, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Material_skin"]
+albedo_color = Color(0.65, 0.43, 0.31, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Material_dark"]
+albedo_color = Color(0.055, 0.045, 0.04, 1)
+metallic = 0.25
+roughness = 0.6
+
+[node name="Bandit" type="CharacterBody3D"]
+script = ExtResource("1_bandit")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("Shape_bandit")
+
+[node name="Visual" type="Node3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 0.86, 0)
+mesh = SubResource("Mesh_body")
+material_override = SubResource("Material_cloth")
+
+[node name="Head" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 1.67, 0)
+mesh = SubResource("Mesh_head")
+material_override = SubResource("Material_skin")
+
+[node name="HeadWrap" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 1.88, 0)
+rotation_degrees = Vector3(0, 0, -8)
+mesh = SubResource("Mesh_wrap")
+material_override = SubResource("Material_dark")
+
+[node name="Weapon" type="MeshInstance3D" parent="Visual"]
+position = Vector3(-0.45, 0.95, -0.12)
+rotation_degrees = Vector3(0, 0, 10)
+mesh = SubResource("Mesh_weapon")
+material_override = SubResource("Material_dark")
+
+[node name="StateLabel" type="Label3D" parent="."]
+position = Vector3(0, 2.35, 0)
+text = "순찰"
+font_size = 34
+outline_size = 7
+modulate = Color(0.96, 0.72, 0.36, 1)
+billboard = 1

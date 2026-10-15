@@ -1,9 +1,10 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="Script" path="res://scripts/world.gd" id="3_world"]
 [ext_resource type="PackedScene" path="res://scenes/npc.tscn" id="4_npc"]
+[ext_resource type="PackedScene" path="res://scenes/bandit.tscn" id="5_bandit"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -106,6 +107,12 @@ npc_id = "innkeeper_deoksun"
 display_name = "덕순 주모"
 accent_color = Color(0.18, 0.35, 0.4, 1)
 
+[node name="BanditA" parent="World" instance=ExtResource("5_bandit")]
+position = Vector3(-2, 0, -46)
+
+[node name="BanditB" parent="World" instance=ExtResource("5_bandit")]
+position = Vector3(3, 0, -50)
+
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector3(0, 0.05, 8)
 
@@ -125,7 +132,7 @@ theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 10
 
 [node name="Text" type="Label" parent="UI/HelpPanel/Margin"]
-text = "WASD 이동 · Shift 달리기 · Space 점프\nE 대화 · 마우스 카메라 · Esc 커서"
+text = "WASD 이동 · Shift 달리기 · Space 점프\n좌클릭 검 공격 · E 대화 · 마우스 카메라 · Esc 커서"
 theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
 theme_override_font_sizes/font_size = 17
 
@@ -180,3 +187,21 @@ text = "윤 행수\n대화 내용"
 autowrap_mode = 2
 theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
 theme_override_font_sizes/font_size = 22
+
+[node name="HealthPanel" type="PanelContainer" parent="UI"]
+offset_left = 28.0
+offset_top = 138.0
+offset_right = 245.0
+offset_bottom = 190.0
+theme_override_styles/panel = SubResource("Panel_style")
+
+[node name="Margin" type="MarginContainer" parent="UI/HealthPanel"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="Health" type="Label" parent="UI/HealthPanel/Margin"]
+text = "체력 100 / 100"
+theme_override_colors/font_color = Color(0.92, 0.38, 0.28, 1)
+theme_override_font_sizes/font_size = 18

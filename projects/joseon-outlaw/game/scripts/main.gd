@@ -1,13 +1,14 @@
 extends Node3D
 
-const IMPLEMENTED_PHASE := 3
+const IMPLEMENTED_PHASE := 4
 const INTERACTION_RANGE := 3.0
 
-@onready var player: CharacterBody3D = $Player
+@onready var player: PlayerController = $Player
 @onready var objective_label: Label = $UI/ObjectivePanel/Margin/Objective
 @onready var prompt_label: Label = $UI/Prompt
 @onready var dialogue_panel: PanelContainer = $UI/Dialogue
 @onready var dialogue_text: Label = $UI/Dialogue/Margin/Text
+@onready var health_label: Label = $UI/HealthPanel/Margin/Health
 
 var _smoke_phase := 0
 var _screenshot_path := ""
@@ -18,6 +19,8 @@ func _ready() -> void:
     QuestManager.reset()
     QuestManager.state_changed.connect(_on_quest_state_changed)
     _update_objective()
+    player.health_changed.connect(_on_player_health_changed)
+    _on_player_health_changed(player.health, player.max_health)
     print("JOSEON_OUTLAW_READY phase=%d" % IMPLEMENTED_PHASE)
     for argument in OS.get_cmdline_user_args():
         if argument.begins_with("--smoke-phase="):
@@ -67,6 +70,10 @@ func _on_quest_state_changed(_previous: String, _current: String) -> void:
 func _update_objective() -> void:
     objective_label.text = "의뢰 · %s" % QuestManager.objective()
 
+func _on_player_health_changed(current: int, maximum: int) -> void:
+    health_label.text = "체력 %d / %d" % [current, maximum]
+
+
 
 func _finish_smoke() -> void:
     if _smoke_phase > IMPLEMENTED_PHASE:
@@ -82,6 +89,8 @@ func _finish_smoke() -> void:
     if _smoke_phase >= 2 and not await _smoke_player(camera):
         return
     if _smoke_phase >= 3 and not _smoke_quest():
+        return
+    if _smoke_phase >= 4 and not await _smoke_combat():
         return
     if not _screenshot_path.is_empty():
         await get_tree().process_frame
@@ -160,6 +169,45 @@ func _smoke_quest() -> bool:
     first_line = merchant.call("interact")
     _show_dialogue(first_line)
     print("QUEST_SMOKE npcs=2 state=%s objective=%s invalid_transition=blocked" % [QuestManager.state, QuestManager.objective()])
+    return true
+
+func _smoke_combat() -> bool:
+    var bandit_a := get_node_or_null("World/BanditA") as BanditController
+    var bandit_b := get_node_or_null("World/BanditB") as BanditController
+    if bandit_a == null or bandit_b == null or get_tree().get_nodes_in_group("enemies").size() != 2:
+        _fail_smoke("Combatants are missing")
+        return false
+    CombatCoordinator.reset()
+    player.restore_at(Vector3(0, 0.05, -43))
+    bandit_a.reset_combat(Vector3(-0.8, 0.05, -44.7))
+    bandit_b.reset_combat(Vector3(0.8, 0.05, -44.7))
+    bandit_a.set_combat_target(player)
+    bandit_b.set_combat_target(player)
+    for frame in 8:
+        await get_tree().physics_frame
+    var attacking := 0
+    for enemy in [bandit_a, bandit_b]:
+        if enemy.state == BanditController.ATTACK:
+            attacking += 1
+    if attacking != 1 or CombatCoordinator.max_concurrent_attackers != 1 or player.health >= player.max_health:
+        _fail_smoke("Attack token or enemy damage failed: attacking=%d health=%d" % [attacking, player.health])
+        return false
+
+    CombatCoordinator.reset()
+    player.restore_at(Vector3(0, 0.05, -43))
+    bandit_a.reset_combat(Vector3(0, 0.05, -45))
+    bandit_b.reset_combat(Vector3(5, 0.05, -47))
+    bandit_a.set_combat_target(player)
+    bandit_b.set_combat_target(player)
+    var total_hits := 0
+    for strike in 3:
+        total_hits += player.attack()
+        for frame in 24:
+            await get_tree().physics_frame
+    if total_hits != 3 or bandit_a.state != BanditController.DEAD or bandit_a.health != 0:
+        _fail_smoke("Sword damage sequence failed: hits=%d health=%d state=%s" % [total_hits, bandit_a.health, bandit_a.state])
+        return false
+    print("COMBAT_SMOKE hits=%d enemy_health=%d state=%s token_max=%d player_health=%d" % [total_hits, bandit_a.health, bandit_a.state, CombatCoordinator.max_concurrent_attackers, player.health])
     return true
 
 
