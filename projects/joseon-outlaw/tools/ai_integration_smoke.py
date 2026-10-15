@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import time
+from pathlib import Path
 import urllib.error
 import urllib.request
 
@@ -73,8 +74,9 @@ def main() -> int:
         if invalid_status != 422:
             raise SystemExit(f"Invalid contract was not rejected: {invalid_status}")
 
+        godot_bin = Path(os.environ.get("GODOT_BIN", DEFAULT_BIN))
         command = [
-            str(DEFAULT_BIN), "--headless", "--path", str(PROJECT_ROOT / "game"), "--",
+            str(godot_bin), "--headless", "--path", str(PROJECT_ROOT / "game"), "--",
             "--smoke-phase=6", "--require-ai", f"--ai-url={BASE_URL}/v1/dialogue",
         ]
         completed = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", timeout=90)

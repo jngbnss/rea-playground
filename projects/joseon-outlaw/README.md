@@ -1,22 +1,19 @@
-# JOSEON OUTLAW — 사전 준비 산출물
+# JOSEON OUTLAW
 
-[`docs/joseon-outlaw-plan.md`](../../docs/joseon-outlaw-plan.md) 12절 "지금부터 할 일"의 결과물이다. 조사·문서·데이터가 있지만 실제 채택과 구현은 1주차 검증 뒤 확정한다.
-
-상태는 `초안 → 실제 검증 → 확정` 순서다. 현재 라이선스 대장은 **승인 0건, 후보 38건, 제외 10건**이므로 외부 에셋은 아직 사용 확정 상태가 아니다.
+Godot 4.7.2로 구현한 3인칭 조선 활극 수직 슬라이스. 윤 행수의 장부 의뢰를 받아 산길의 도적 둘을 제압하고 장부를 되찾아 보상받는 흐름을 처음부터 끝까지 플레이할 수 있다. 외부 게임 에셋 없이 절차 생성 메시·UI·사운드를 사용한다.
 
 ## 자동 검사와 미리보기
 
-- [GitHub Actions](https://github.com/jngbnss/rea-playground/actions/workflows/joseon-outlaw.yml): PR과 `main` 변경 시 스모크 테스트 실행
-- [UI 목업](https://jngbnss.github.io/rea-playground/): `main` 검사 통과 후 GitHub Pages에 배포
+- [GitHub Actions](https://github.com/jngbnss/rea-playground/actions/workflows/joseon-outlaw.yml): Python·Godot·FastAPI 통합 검사, 10회 연속 완주, Windows 빌드 아티팩트
+- [웹 미리보기](https://jngbnss.github.io/rea-playground/): `main` 검사 통과 후 GitHub Pages에 UI 목업 배포
 
-## 다음 작업
+## 구현 범위
 
-1. 팀원 경험과 시연 PC 사양을 기록한다.
-2. Godot 4.7.2 우선 후보로 Windows 내보내기를 검증하고, 실패하면 4.6.3을 시험한다.
-3. 3인칭 이동·카메라와 회색박스 마을·산길을 구현한다.
-4. 고정 대사 기반 NPC 상호작용과 장부 회수 퀘스트를 연결한다.
-5. 검 전투와 적 FSM을 붙여 AI 없이 처음부터 끝까지 완주한다.
-6. FastAPI와 로컬 LLM을 연결하고 실패 시 고정 대사 fallback을 검증한다.
+- 3인칭 이동·달리기·점프·카메라 충돌과 검 전투
+- 조선 마을·산길·도적 소굴, NPC 2명, 도적 AI 2명
+- 의뢰 수락·장부 회수·지름길·제출·보상·엔딩, 체크포인트 부활
+- FastAPI/Ollama 상태별 대사 캐시와 2초 제한·정책 검증·고정 대사 fallback
+- 튜토리얼, 일시정지, 음량, 성능 로그, 절차 생성 배경음
 
 ## 항목별 산출물
 
@@ -41,12 +38,19 @@ Python 3.11 이상과 Godot 4.7.2 표준 빌드를 사용한다.
 
 ```bash
 cd projects/joseon-outlaw
-python run_smoke.py                 # 데이터·계약·도구 검사
-python -m tools.godot_smoke --phase 1
-python -m tools.export_windows      # Windows 내보내기 후 실행 파일 기동
+python -m pip install -r requirements.txt
+python run_smoke.py
+python -m tools.godot_smoke --phase 7
+python -m tools.ai_integration_smoke
+python -m tools.repeat_godot_smoke --phase 7 --runs 10
+python -m tools.export_windows --phase 7
 ```
 
-에디터에서는 `game/project.godot`을 연다. 명령행 실행은 `godot --path game`이다. 기준 PC와 도구 버전은 [`docs/environment.md`](docs/environment.md), 단계별 완료 기준은 [`docs/implementation-checklist.md`](docs/implementation-checklist.md), 구현 중 오류는 [`docs/implementation-errors.md`](docs/implementation-errors.md)에 기록한다.
+게임은 `godot --path game`으로 실행한다. 조작은 `WASD`, `Shift`, `Space`, 마우스, 좌클릭 공격, `E` 상호작용, `P` 일시정지, `F1` 도움말, `[`/`]` 음량이다.
+
+AI 대사는 선택 기능이다. `ollama serve`와 `qwen3:4b-instruct`를 준비한 뒤 `python -m uvicorn ai_server.app:app --host 127.0.0.1 --port 8765`를 실행한다. 서버가 없거나 2초를 넘기거나 검증에 실패해도 고정 대사로 전체 게임을 완주할 수 있다.
+
+에디터에서는 `game/project.godot`을 연다. 기준 PC와 도구 버전은 [`docs/environment.md`](docs/environment.md), 단계별 완료 기준은 [`docs/implementation-checklist.md`](docs/implementation-checklist.md), 구현 중 오류는 [`docs/implementation-errors.md`](docs/implementation-errors.md)에 기록한다.
 
 ## 11. AI 계약 요약
 
@@ -55,10 +59,3 @@ python -m tools.export_windows      # Windows 내보내기 후 실행 파일 기
 - [`data/dialogue_policy.json`](data/dialogue_policy.json): NPC·상태별 허용 intent, 고정 대사, 선택지. 퀘스트를 움직이는 것은 `game_event`가 붙은 선택지뿐이다.
 - [`ai_server/validator.py`](ai_server/validator.py) `finalize()`는 어떤 입력에도 스키마를 만족하는 응답을 돌려준다. 타임아웃, JSON 깨짐, 허용되지 않은 intent, 금칙어, 영어 섞임, 낱말 반복이면 고정 대사로 대체한다.
 - [`ai_server/prompt.py`](ai_server/prompt.py)는 OpenAI 호환 메시지를 만든다. Ollama와 llama.cpp server에서 그대로 쓸 수 있다.
-
-## 1주차로 넘기는 것
-
-- 팀원 조사(12절 1번)와 시연 PC 사양(8번)
-- 스타일, 에셋 팩, 모델의 최종 선택
-- 기본 노드로 수직 슬라이스를 만든 뒤 필요한 플러그인만 실제 설치·내보내기로 검증 (09번 4절)
-- 사람 평가 2인 (10번 4절)

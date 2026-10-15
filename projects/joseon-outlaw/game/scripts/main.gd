@@ -1,6 +1,6 @@
 extends Node3D
 
-const IMPLEMENTED_PHASE := 6
+const IMPLEMENTED_PHASE := 7
 const INTERACTION_RANGE := 3.0
 
 @onready var player: PlayerController = $Player
@@ -10,15 +10,22 @@ const INTERACTION_RANGE := 3.0
 @onready var dialogue_text: Label = $UI/Dialogue/Margin/Text
 @onready var health_label: Label = $UI/HealthPanel/Margin/Health
 @onready var end_panel: PanelContainer = $UI/EndPanel
+@onready var tutorial_panel: PanelContainer = $UI/TutorialPanel
+@onready var pause_panel: PanelContainer = $UI/PausePanel
 
 var _smoke_phase := 0
 var _screenshot_path := ""
 var _require_ai := false
 var _nearby_npc: Node3D
 var _checkpoint := Vector3(0, 0.05, 5)
+var _ambient_player: AudioStreamPlayer
 
 
 func _ready() -> void:
+    process_mode = Node.PROCESS_MODE_ALWAYS
+    player.process_mode = Node.PROCESS_MODE_PAUSABLE
+    $World.process_mode = Node.PROCESS_MODE_PAUSABLE
+    _setup_ambient_audio()
     QuestManager.reset()
     QuestManager.state_changed.connect(_on_quest_state_changed)
     _update_objective()
@@ -42,6 +49,12 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
     if _smoke_phase > 0:
         return
+    if tutorial_panel.visible and (
+        Input.get_vector("move_left", "move_right", "move_forward", "move_back").length_squared() > 0.0
+        or Input.is_action_just_pressed("interact")
+        or Input.is_action_just_pressed("attack")
+    ):
+        tutorial_panel.hide()
     _nearby_npc = _find_nearest_npc()
     prompt_label.text = _nearby_npc.call("prompt") if _nearby_npc != null else ""
     if Input.is_action_just_pressed("interact"):
@@ -49,6 +62,21 @@ func _process(_delta: float) -> void:
             dialogue_panel.hide()
         elif _nearby_npc != null:
             _show_dialogue(_nearby_npc.call("interact"))
+
+
+func _unhandled_input(event: InputEvent) -> void:
+    if event.is_action_pressed("pause"):
+        _toggle_pause()
+        get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("tutorial"):
+        tutorial_panel.visible = not tutorial_panel.visible
+        get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("volume_down"):
+        _adjust_volume(-2.0)
+        get_viewport().set_input_as_handled()
+    elif event.is_action_pressed("volume_up"):
+        _adjust_volume(2.0)
+        get_viewport().set_input_as_handled()
 
 
 func _find_nearest_npc() -> Node3D:
@@ -113,6 +141,8 @@ func _finish_smoke() -> void:
         return
     if _smoke_phase >= 6 and not await _smoke_ai_dialogue():
         return
+    if _smoke_phase >= 7 and not _smoke_polish():
+        return
     if not _screenshot_path.is_empty():
         await get_tree().process_frame
         await get_tree().process_frame
@@ -122,6 +152,8 @@ func _finish_smoke() -> void:
             return
         print("SCREENSHOT_OK path=%s" % _screenshot_path)
     print("SMOKE_OK phase=%d renderer=%s" % [_smoke_phase, RenderingServer.get_current_rendering_method()])
+    _shutdown_audio()
+    await get_tree().process_frame
     get_tree().quit(0)
 
 
@@ -300,8 +332,79 @@ func _smoke_ai_dialogue() -> bool:
     print("AI_DIALOGUE_SMOKE immediate=fallback server_response=%s timeout_s=2.0 cache=%s" % [source, "hit" if not response.is_empty() else "miss"])
     return true
 
+func _smoke_polish() -> bool:
+    if tutorial_panel == null or pause_panel == null or _ambient_player == null or _ambient_player.stream == null:
+        _fail_smoke("Tutorial, pause, or ambient audio is missing")
+        return false
+    _toggle_pause()
+    if not get_tree().paused or not pause_panel.visible:
+        _fail_smoke("Pause menu did not pause the scene tree")
+        return false
+    _toggle_pause()
+    if get_tree().paused or pause_panel.visible:
+        _fail_smoke("Pause menu did not resume the scene tree")
+        return false
+    var before_volume := AudioServer.get_bus_volume_db(0)
+    _adjust_volume(-2.0)
+    if AudioServer.get_bus_volume_db(0) >= before_volume:
+        _fail_smoke("Volume setting did not change")
+        return false
+    _adjust_volume(2.0)
+    tutorial_panel.hide()
+    var values := Metrics.snapshot()
+    if not values.has("memory_mib"):
+        _fail_smoke("Runtime memory metric is invalid")
+        return false
+    print("POLISH_SMOKE tutorial=ok pause=ok audio=ok fps=%.1f memory_mib=%.1f objects=%d" % [values.fps, values.memory_mib, int(values.objects)])
+    return true
+
+
+func _toggle_pause() -> void:
+    get_tree().paused = not get_tree().paused
+    pause_panel.visible = get_tree().paused
+
+
+func _adjust_volume(delta_db: float) -> void:
+    var volume := clampf(AudioServer.get_bus_volume_db(0) + delta_db, -40.0, 0.0)
+    AudioServer.set_bus_volume_db(0, volume)
+    $UI/PausePanel/Margin/Text.text = "잠시 멈춤\n\nP 계속하기 · F1 도움말\n[ / ] 음량 조절  %.0f dB" % volume
+
+
+func _setup_ambient_audio() -> void:
+    const MIX_RATE := 22050
+    const SAMPLE_COUNT := MIX_RATE * 4
+    var data := PackedByteArray()
+    data.resize(SAMPLE_COUNT * 2)
+    for index in SAMPLE_COUNT:
+        var time := float(index) / MIX_RATE
+        var envelope := 0.65 + 0.35 * sin(TAU * time / 4.0)
+        var sample := int((sin(TAU * 110.0 * time) * 900.0 + sin(TAU * 165.0 * time) * 420.0) * envelope)
+        data.encode_s16(index * 2, sample)
+    var stream := AudioStreamWAV.new()
+    stream.format = AudioStreamWAV.FORMAT_16_BITS
+    stream.mix_rate = MIX_RATE
+    stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+    stream.loop_end = SAMPLE_COUNT
+    stream.data = data
+    _ambient_player = AudioStreamPlayer.new()
+    _ambient_player.name = "AmbientMusic"
+    _ambient_player.stream = stream
+    _ambient_player.volume_db = -22.0
+    add_child(_ambient_player)
+    if DisplayServer.get_name() != "headless":
+        _ambient_player.play()
+
+
+func _shutdown_audio() -> void:
+    if _ambient_player != null:
+        _ambient_player.stop()
+        _ambient_player.stream = null
+        _ambient_player.queue_free()
+        _ambient_player = null
+
 
 func _fail_smoke(message: String) -> void:
     print("SMOKE_FAIL phase=%d reason=%s" % [_smoke_phase, message])
     push_error(message)
+    _shutdown_audio()
     get_tree().quit(1)

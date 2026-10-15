@@ -16,6 +16,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--phase", type=int, required=True)
     parser.add_argument("--godot", type=Path, default=Path(os.environ.get("GODOT_BIN", DEFAULT_BIN)))
+    parser.add_argument("--timeout", type=int, default=180)
     args = parser.parse_args()
 
     if not args.godot.is_file():
@@ -29,7 +30,13 @@ def main() -> int:
         "--",
         f"--smoke-phase={args.phase}",
     ]
-    completed = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", timeout=60)
+    try:
+        completed = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", timeout=args.timeout)
+    except subprocess.TimeoutExpired as error:
+        stdout = error.stdout.decode("utf-8", errors="replace") if isinstance(error.stdout, bytes) else (error.stdout or "")
+        stderr = error.stderr.decode("utf-8", errors="replace") if isinstance(error.stderr, bytes) else (error.stderr or "")
+        print((stdout + stderr).strip())
+        raise SystemExit(f"Godot smoke timed out after {args.timeout}s") from error
     output = completed.stdout + completed.stderr
     print(output.strip())
     marker = f"SMOKE_OK phase={args.phase}"

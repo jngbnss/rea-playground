@@ -141,7 +141,7 @@ theme_override_constants/margin_right = 16
 theme_override_constants/margin_bottom = 10
 
 [node name="Text" type="Label" parent="UI/HelpPanel/Margin"]
-text = "WASD 이동 · Shift 달리기 · Space 점프\n좌클릭 검 공격 · E 대화 · 마우스 카메라 · Esc 커서"
+text = "WASD 이동 · Shift 달리기 · Space 점프\n좌클릭 검 공격 · E 대화 · P 멈춤 · F1 도움말"
 theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
 theme_override_font_sizes/font_size = 17
 
@@ -235,3 +235,45 @@ horizontal_alignment = 1
 vertical_alignment = 1
 theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
 theme_override_font_sizes/font_size = 24
+
+[node name="TutorialPanel" type="PanelContainer" parent="UI"]
+offset_left = 350.0
+offset_top = 145.0
+offset_right = 930.0
+offset_bottom = 330.0
+theme_override_styles/panel = SubResource("Scroll_style")
+
+[node name="Margin" type="MarginContainer" parent="UI/TutorialPanel"]
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 20
+
+[node name="Text" type="Label" parent="UI/TutorialPanel/Margin"]
+text = "청송골의 빼앗긴 장부\n\n윤 행수에게 말을 걸고 북쪽 산길로 가십시오.\nWASD 이동 · 좌클릭 공격 · E 상호작용 · F1 도움말"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
+theme_override_font_sizes/font_size = 20
+
+[node name="PausePanel" type="PanelContainer" parent="UI"]
+visible = false
+process_mode = 3
+offset_left = 420.0
+offset_top = 235.0
+offset_right = 860.0
+offset_bottom = 445.0
+theme_override_styles/panel = SubResource("Panel_style")
+
+[node name="Margin" type="MarginContainer" parent="UI/PausePanel"]
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 20
+
+[node name="Text" type="Label" parent="UI/PausePanel/Margin"]
+text = "잠시 멈춤\n\nP 계속하기 · F1 도움말\n[ / ] 음량 조절"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
+theme_override_font_sizes/font_size = 22
