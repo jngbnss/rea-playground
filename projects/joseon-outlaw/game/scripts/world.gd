@@ -7,6 +7,8 @@ var _roof := _material(Color("292724"))
 var _path := _material(Color("8a6541"))
 var _pine := _material(Color("304c2d"))
 var _stone := _material(Color("77746b"))
+var _red := _material(Color("9f3027"))
+var _gold := _material(Color("d9a441"))
 
 
 func _ready() -> void:
@@ -27,6 +29,10 @@ func _build_village() -> void:
     _hanok(Vector3(-9, 0, -10), Vector3(5, 2.8, 4.5), "창고")
     _gate(Vector3(0, 0, -13))
     _marker(Vector3(0, 3.6, 8), "청송골")
+    _box("MarketBannerLeft", Vector3(-4.2, 2.0, -12.7), Vector3(0.8, 2.2, 0.08), _red, false)
+    _box("MarketBannerRight", Vector3(4.2, 2.0, -12.7), Vector3(0.8, 2.2, 0.08), _red, false)
+    for position in [Vector3(-4, 2.5, 4), Vector3(4, 2.5, -5), Vector3(-3, 2.5, -11)]:
+        _cylinder(position, 0.24, 0.55, _gold)
     for position in [Vector3(-13, 0, 5), Vector3(13, 0, 2), Vector3(-14, 0, -8)]:
         _tree(position)
 
@@ -46,6 +52,8 @@ func _build_camp() -> void:
     _box("Tent", Vector3(-4, 1.2, -55), Vector3(4, 2.4, 3), _roof, true)
     _box("LedgerChest", Vector3(3.6, 0.6, -55), Vector3(1.3, 1.2, 0.9), _wood, true)
     _marker(Vector3(0, 3.2, -59), "도적 소굴")
+    _cylinder(Vector3(0, 0.45, -51), 0.65, 0.18, _gold, 0.35)
+    _box("CampBanner", Vector3(0, 2.0, -58.5), Vector3(2.6, 1.5, 0.08), _red, false)
 
 
 func _hanok(position: Vector3, size: Vector3, title: String) -> void:

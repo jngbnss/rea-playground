@@ -26,6 +26,7 @@ def main() -> int:
     parser.add_argument("--godot", type=Path, default=Path(os.environ.get("GODOT_BIN", DEFAULT_BIN)))
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--phase", type=int, default=1)
+    parser.add_argument("--export-only", action="store_true", help="Create the Windows artifact without launching it")
     args = parser.parse_args()
 
     if not args.godot.is_file():
@@ -38,6 +39,9 @@ def main() -> int:
     ], timeout=300)
     if not args.output.is_file():
         raise SystemExit(f"Export did not create {args.output}")
+    if args.export_only:
+        print(f"EXPORT_ONLY_OK phase={args.phase} path={args.output} bytes={args.output.stat().st_size}")
+        return 0
 
     completed = run([str(args.output), "--headless", "--", f"--smoke-phase={args.phase}"])
     marker = f"SMOKE_OK phase={args.phase}"

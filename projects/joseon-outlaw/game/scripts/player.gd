@@ -169,6 +169,10 @@ func _ensure_input_actions() -> void:
         &"jump": KEY_SPACE,
         &"interact": KEY_E,
         &"toggle_mouse": KEY_ESCAPE,
+        &"pause": KEY_P,
+        &"tutorial": KEY_F1,
+        &"volume_down": KEY_BRACKETLEFT,
+        &"volume_up": KEY_BRACKETRIGHT,
     }
     for action: StringName in actions:
         if InputMap.has_action(action):
