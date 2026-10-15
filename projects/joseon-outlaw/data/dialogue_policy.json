@@ -19,8 +19,8 @@
       "accepted": {
         "allowed_intents": ["give_hint", "remind_objective", "small_talk", "farewell"],
         "fallback": [
-          { "intent": "remind_objective", "emotion": "worried", "text": "고갯마루 너머 무너진 서낭당이오. 도적은 둘이니 부디 몸조심하시오." },
-          { "intent": "give_hint", "emotion": "neutral", "text": "장승을 지나거든 발소리를 죽이시오. 놈들은 불가에 모여 있을 게요." }
+          { "intent": "remind_objective", "emotion": "worried", "text": "장터 밖 역참 수레를 타고 금빛 관문 셋을 지나시오. 고갯마루 도적은 둘이오." },
+          { "intent": "give_hint", "emotion": "neutral", "text": "수레가 길을 벗어나면 고삐를 바로잡고 다시 관문을 향하시오." }
         ],
         "choices": [
           { "id": "leave", "label": "(고갯길로 향한다)", "game_event": null }
@@ -56,8 +56,8 @@
       "accepted": {
         "allowed_intents": ["give_hint", "remind_objective", "small_talk", "farewell"],
         "fallback": [
-          { "intent": "give_hint", "emotion": "worried", "text": "도적은 둘인데 하나는 덩치가 산만 하다우. 해 질 녘엔 서낭당 쪽에 불을 피운다니께." },
-          { "intent": "farewell", "emotion": "neutral", "text": "몸 성히 다녀오시우. 국은 데워 놓을 테니." }
+          { "intent": "give_hint", "emotion": "worried", "text": "수레로 금빛 관문 셋을 지나야 도적 소굴의 장부를 찾을 수 있다우." },
+          { "intent": "farewell", "emotion": "neutral", "text": "고삐 단단히 잡고 몸 성히 다녀오시우." }
         ],
         "choices": []
       },

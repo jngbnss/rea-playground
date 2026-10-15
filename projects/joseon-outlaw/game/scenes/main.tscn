@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=25 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -12,6 +12,7 @@
 [ext_resource type="Texture2D" path="res://assets/polyhaven/forest_ground_04/forest_ground_04_diff_1k.jpg" id="10_ground_diff"]
 [ext_resource type="Texture2D" path="res://assets/polyhaven/forest_ground_04/forest_ground_04_nor_gl_1k.jpg" id="11_ground_normal"]
 [ext_resource type="Texture2D" path="res://assets/polyhaven/forest_ground_04/forest_ground_04_rough_1k.jpg" id="12_ground_rough"]
+[ext_resource type="PackedScene" path="res://scenes/courier_cart.tscn" id="13_cart"]
 
 [sub_resource type="PanoramaSkyMaterial" id="SkyMaterial_dusk"]
 panorama = ExtResource("9_sky")
@@ -171,6 +172,9 @@ display_name = "마을 지름길"
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector3(0, 0.05, 8)
 
+[node name="CourierCart" parent="." instance=ExtResource("13_cart")]
+position = Vector3(0, 0.05, -24)
+
 [node name="UI" type="CanvasLayer" parent="."]
 
 [node name="Brand" type="Label" parent="UI"]
@@ -190,7 +194,7 @@ horizontal_alignment = 1
 offset_left = 26.0
 offset_top = 26.0
 offset_right = 386.0
-offset_bottom = 103.0
+offset_bottom = 122.0
 theme_override_styles/panel = SubResource("Panel_ink")
 
 [node name="Margin" type="MarginContainer" parent="UI/HelpPanel"]
@@ -203,7 +207,7 @@ theme_override_constants/margin_bottom = 9
 theme_override_colors/font_color = Color(0.86, 0.81, 0.72, 1)
 theme_override_fonts/font = ExtResource("8_body")
 theme_override_font_sizes/font_size = 14
-text = "WASD 이동 · Shift 달리기 · Space 점프\n좌클릭 공격 · E 대화 · P 멈춤 · F1 도움말"
+text = "WASD 이동·수레 조종 · Shift 달리기 · Space 점프\n좌클릭 공격 · E 대화·탑승 · R 수레 복귀\nP 멈춤 · F1 도움말"
 
 [node name="ObjectivePanel" type="PanelContainer" parent="UI"]
 offset_left = 866.0
@@ -299,6 +303,35 @@ show_percentage = false
 theme_override_styles/background = SubResource("Health_background")
 theme_override_styles/fill = SubResource("Health_fill")
 
+[node name="CartPanel" type="PanelContainer" parent="UI"]
+visible = false
+offset_left = 26.0
+offset_top = 204.0
+offset_right = 302.0
+offset_bottom = 280.0
+theme_override_styles/panel = SubResource("Panel_ink")
+
+[node name="Margin" type="MarginContainer" parent="UI/CartPanel"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 8
+
+[node name="Stack" type="VBoxContainer" parent="UI/CartPanel/Margin"]
+theme_override_constants/separation = 3
+
+[node name="Speed" type="Label" parent="UI/CartPanel/Margin/Stack"]
+theme_override_colors/font_color = Color(0.93, 0.79, 0.58, 1)
+theme_override_fonts/font = ExtResource("7_display")
+theme_override_font_sizes/font_size = 18
+text = "수레 0 km/h"
+
+[node name="Route" type="Label" parent="UI/CartPanel/Margin/Stack"]
+theme_override_colors/font_color = Color(0.86, 0.81, 0.72, 1)
+theme_override_fonts/font = ExtResource("8_body")
+theme_override_font_sizes/font_size = 14
+text = "운송 관문 0 / 3"
+
 [node name="EndPanel" type="PanelContainer" parent="UI"]
 visible = false
 offset_left = 358.0
@@ -348,7 +381,7 @@ horizontal_alignment = 1
 theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
 theme_override_fonts/font = ExtResource("8_body")
 theme_override_font_sizes/font_size = 18
-text = "윤 행수에게 말을 걸고 북쪽 산길로 가십시오.\nWASD 이동 · 좌클릭 공격 · E 상호작용 · F1 도움말"
+text = "윤 행수의 의뢰를 받고 역참 수레로 금빛 관문 셋을 통과하십시오.\n도적 소굴에서 내려 전투한 뒤 장부를 되찾으십시오.\nWASD 이동·조종 · 좌클릭 공격 · E 상호작용 · R 수레 복귀"
 horizontal_alignment = 1
 autowrap_mode = 2
 

@@ -4,13 +4,18 @@ const IMPLEMENTED_PHASE := 7
 const INTERACTION_RANGE := 3.0
 
 @onready var player: PlayerController = $Player
+@onready var courier_cart: CourierCart = $CourierCart
 @onready var objective_label: Label = $UI/ObjectivePanel/Margin/Objective
 @onready var prompt_label: Label = $UI/Prompt
 @onready var dialogue_panel: PanelContainer = $UI/Dialogue
 @onready var dialogue_speaker: Label = $UI/Dialogue/Margin/Stack/Speaker
 @onready var dialogue_text: Label = $UI/Dialogue/Margin/Stack/Text
+@onready var health_panel: PanelContainer = $UI/HealthPanel
 @onready var health_label: Label = $UI/HealthPanel/Margin/Stack/Health
 @onready var health_bar: ProgressBar = $UI/HealthPanel/Margin/Stack/HealthBar
+@onready var cart_panel: PanelContainer = $UI/CartPanel
+@onready var cart_speed_label: Label = $UI/CartPanel/Margin/Stack/Speed
+@onready var cart_route_label: Label = $UI/CartPanel/Margin/Stack/Route
 @onready var end_panel: PanelContainer = $UI/EndPanel
 @onready var tutorial_panel: PanelContainer = $UI/TutorialPanel
 @onready var pause_panel: PanelContainer = $UI/PausePanel
@@ -28,8 +33,11 @@ func _ready() -> void:
     player.process_mode = Node.PROCESS_MODE_PAUSABLE
     $World.process_mode = Node.PROCESS_MODE_PAUSABLE
     _setup_ambient_audio()
-    QuestManager.reset()
+    courier_cart.driving_changed.connect(_on_cart_driving_changed)
+    courier_cart.route_progress.connect(_on_cart_route_progress)
+    courier_cart.route_completed.connect(_on_cart_route_completed)
     QuestManager.state_changed.connect(_on_quest_state_changed)
+    QuestManager.reset()
     _update_objective()
     player.health_changed.connect(_on_player_health_changed)
     _on_player_health_changed(player.health, player.max_health)
@@ -51,6 +59,8 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
     if _smoke_phase > 0:
         return
+    if courier_cart.driving:
+        cart_speed_label.text = "수레 %d km/h" % roundi(absf(courier_cart.forward_speed) * 3.6)
     if tutorial_panel.visible and (
         Input.get_vector("move_left", "move_right", "move_forward", "move_back").length_squared() > 0.0
         or Input.is_action_just_pressed("interact")
@@ -103,6 +113,8 @@ func _show_dialogue(line: Dictionary) -> void:
 
 
 func _on_quest_state_changed(_previous: String, current: String) -> void:
+    if current == QuestManager.NOT_STARTED:
+        courier_cart.reset_route()
     _update_objective()
     end_panel.visible = current == QuestManager.COMPLETED
     AIClient.prefetch("merchant_yun", current)
@@ -110,7 +122,29 @@ func _on_quest_state_changed(_previous: String, current: String) -> void:
 
 
 func _update_objective() -> void:
+    if QuestManager.state == QuestManager.ACCEPTED and not courier_cart.route_complete:
+        objective_label.text = "의뢰 · 역참 수레로 운송 관문 %d / %d 통과" % [
+            courier_cart.checkpoint_index,
+            courier_cart.CHECKPOINTS.size(),
+        ]
+        return
     objective_label.text = "의뢰 · %s" % QuestManager.objective()
+
+
+func _on_cart_driving_changed(active: bool) -> void:
+    cart_panel.visible = active
+    health_panel.visible = not active
+    _update_objective()
+
+
+func _on_cart_route_progress(current: int, total: int) -> void:
+    cart_route_label.text = "운송 관문 %d / %d" % [current, total]
+    _update_objective()
+
+
+func _on_cart_route_completed() -> void:
+    cart_route_label.text = "운송 완료 · 도적 소굴에서 하차"
+    _update_objective()
 
 func _on_player_health_changed(current: int, maximum: int) -> void:
     health_label.text = "생명 %d / %d" % [current, maximum]
@@ -276,7 +310,7 @@ func _smoke_complete_run() -> bool:
     var shortcut := get_node_or_null("World/VillageShortcut")
     var bandit_a := get_node_or_null("World/BanditA") as BanditController
     var bandit_b := get_node_or_null("World/BanditB") as BanditController
-    if merchant == null or chest == null or shortcut == null or bandit_a == null or bandit_b == null:
+    if merchant == null or chest == null or shortcut == null or courier_cart == null or bandit_a == null or bandit_b == null:
         _fail_smoke("Complete-run objects are missing")
         return false
 
@@ -294,10 +328,36 @@ func _smoke_complete_run() -> bool:
     bandit_b.reset_combat(Vector3(3, 0.05, -50))
     bandit_a.take_damage(bandit_a.max_health, player)
     bandit_b.take_damage(bandit_b.max_health, player)
+    var blocked_line: Dictionary = chest.call("interact")
+    if QuestManager.state != QuestManager.ACCEPTED or "수레" not in blocked_line.get("text", ""):
+        _fail_smoke("Ledger did not require the courier route")
+        return false
+
+    player.restore_at(courier_cart.global_position + Vector3(1.5, 0.05, 0))
+    var mount_line: Dictionary = courier_cart.interact()
+    if not courier_cart.driving or "고삐" not in mount_line.get("text", ""):
+        _fail_smoke("Courier cart could not be mounted")
+        return false
+    courier_cart.set_test_input(1.0, 0.0, 0.0)
+    var peak_speed := 0.0
+    for frame in 360:
+        await get_tree().physics_frame
+        peak_speed = maxf(peak_speed, courier_cart.forward_speed)
+        if courier_cart.route_complete:
+            break
+    courier_cart.clear_test_input()
+    if not courier_cart.route_complete or courier_cart.checkpoint_index != courier_cart.CHECKPOINTS.size() or peak_speed < 8.0:
+        _fail_smoke("Courier route failed: checkpoints=%d speed=%.2f" % [courier_cart.checkpoint_index, peak_speed])
+        return false
+    courier_cart.interact()
+    if courier_cart.driving or not player.visible:
+        _fail_smoke("Courier cart did not restore the player after dismount")
+        return false
+
     var chest_line: Dictionary = chest.call("interact")
     _show_dialogue(chest_line)
     if QuestManager.state != QuestManager.ITEM_RECOVERED:
-        _fail_smoke("Ledger could not be recovered after defeating bandits")
+        _fail_smoke("Ledger could not be recovered after route and combat")
         return false
     player.global_position = shortcut.global_position
     var shortcut_line: Dictionary = shortcut.call("interact")
@@ -310,7 +370,7 @@ func _smoke_complete_run() -> bool:
     if QuestManager.state != QuestManager.COMPLETED or QuestManager.reward_nyang != 50 or not end_panel.visible:
         _fail_smoke("Quest completion or reward failed")
         return false
-    print("COMPLETE_RUN_SMOKE state=%s reward=%d respawn=ok shortcut=ok ai_server=not_required" % [QuestManager.state, QuestManager.reward_nyang])
+    print("COMPLETE_RUN_SMOKE route=3/3 peak_speed=%.2f state=%s reward=%d respawn=ok shortcut=ok ai_server=not_required" % [peak_speed, QuestManager.state, QuestManager.reward_nyang])
     return true
 
 func _smoke_ai_dialogue() -> bool:
@@ -342,8 +402,10 @@ func _smoke_ai_dialogue() -> bool:
 
 func _prepare_showcase() -> void:
     QuestManager.reset()
-    player.restore_at(Vector3(0, 0.05, 8))
+    QuestManager.accept_quest()
+    player.restore_at(courier_cart.global_position + Vector3(0, 0.05, 2.0))
     player.rotation_degrees = Vector3.ZERO
+    courier_cart.interact()
     dialogue_panel.hide()
     end_panel.hide()
     tutorial_panel.hide()

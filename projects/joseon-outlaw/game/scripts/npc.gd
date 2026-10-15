@@ -24,9 +24,9 @@ func interact() -> Dictionary:
         match QuestManager.state:
             QuestManager.NOT_STARTED:
                 QuestManager.accept_quest()
-                return _dialogue("북쪽 고갯길 도적에게 장부를 빼앗겼소. 되찾아 주겠소?")
+                return _dialogue("북쪽 고갯길 도적에게 장부를 빼앗겼소. 역참 수레를 몰아 되찾아 주겠소?")
             QuestManager.ACCEPTED:
-                return _dialogue("산길 끝 모닥불 근처를 살펴보시오.")
+                return _dialogue("장터 밖 수레로 금빛 관문 셋을 지나 도적 소굴로 가시오.")
             QuestManager.ITEM_RECOVERED:
                 QuestManager.complete_quest()
                 return _dialogue("장부를 찾았구려! 약속한 쉰 냥을 받으시오.")
@@ -36,7 +36,7 @@ func interact() -> Dictionary:
         QuestManager.NOT_STARTED:
             return _dialogue("윤 행수가 근심이 깊어 보이더구나.")
         QuestManager.ACCEPTED:
-            return _dialogue("고갯길 도적은 둘이란다. 조심해라.")
+            return _dialogue("수레를 몰 땐 금빛 관문 셋을 차례로 지나야 한단다.")
         QuestManager.ITEM_RECOVERED:
             return _dialogue("무사히 돌아왔구나. 윤 행수에게 가 보렴.")
         _:

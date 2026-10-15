@@ -13,9 +13,9 @@
       "prompt_context": "나그네는 아직 의뢰를 받지 않았다."
     },
     "accepted": {
-      "objective": "북쪽 고갯길의 도적 소굴에서 장부를 되찾는다",
-      "marker": "bandit_camp",
-      "prompt_context": "나그네가 장부 회수를 맡았고 아직 찾지 못했다."
+      "objective": "역참 수레로 운송 관문을 통과하고 도적 소굴에서 장부를 되찾는다",
+      "marker": "courier_cart",
+      "prompt_context": "나그네가 장부 회수를 맡았고 아직 찾지 못했다. 역참 수레 운송과 도적 제압을 마쳐야 한다."
     },
     "item_recovered": {
       "objective": "윤 행수에게 장부를 돌려준다",
@@ -39,8 +39,8 @@
       "from": "accepted",
       "event": "ledger_picked_up",
       "to": "item_recovered",
-      "guard": "world.bandits_defeated == 2",
-      "source": "bandit_camp 상자 상호작용 (두 도적이 쓰러져야 상자가 열린다)"
+      "guard": "world.courier_route_completed and world.bandits_defeated == 2",
+      "source": "도적 소굴 상자 상호작용 (수레 관문 셋 통과 후 두 도적이 쓰러져야 상자가 열린다)"
     },
     {
       "from": "item_recovered",

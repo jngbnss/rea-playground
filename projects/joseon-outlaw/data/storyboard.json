@@ -40,14 +40,15 @@
       "visual_beat": null
     },
     {
-      "id": "B04", "title": "북쪽 고갯길", "location": "mountain_path",
+      "id": "B04", "title": "역참 수레 운송", "location": "mountain_path",
       "duration_s": { "min": 60, "target": 90, "max": 90 },
       "quest_state": "accepted",
-      "camera": "자유. 장승을 지날 때 BGM 전환",
-      "player_does": "달려서 산길을 오른다. 개울 징검다리를 점프로 건넌다",
-      "teaches": ["달리기", "점프"],
+      "camera": "수레 탑승 시 속도에 따라 시야각이 넓어지는 추격 카메라",
+      "player_does": "역참 수레를 몰아 북쪽 산길의 금빛 관문 셋을 순서대로 통과한다",
+      "teaches": ["수레 가속·제동", "수레 조향", "수레 복귀"],
       "dialogue": [],
       "events": [],
+      "world_events": ["courier_gate_1", "courier_gate_2", "courier_gate_3", "courier_route_completed"],
       "audio": ["bgm_mountain", "amb_mountain"],
       "visual_beat": null
     },
