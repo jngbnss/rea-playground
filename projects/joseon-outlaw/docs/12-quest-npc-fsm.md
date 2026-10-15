@@ -72,16 +72,16 @@ stateDiagram-v2
     [*] --> idle
     idle --> wander: wander_timer
     wander --> idle: reached_point
-    idle --> notice: player_near (6m) ⇒ prefetch
-    wander --> notice: player_near ⇒ prefetch
-    returning --> notice: player_near ⇒ prefetch
+    idle --> notice: player_near (6m) ⇒ prepare
+    wander --> notice: player_near ⇒ prepare
+    returning --> notice: player_near ⇒ prepare
     notice --> talking: interact (2.5m)
     talking --> notice: dialogue_closed
     notice --> returning: player_left
     returning --> idle: reached_point
 ```
 
-**prefetch가 핵심이다.** 플레이어가 6m 안에 들어오는 순간(`notice`) AI 서버에 첫 대사를 미리 요청한다. 걸어와서 상호작용 키를 누르기까지 보통 1~2초가 걸리므로, LLM 응답 시간의 대부분이 이 사이에 숨는다. 도착 전에 응답이 없으면 고정 대사를 먼저 띄우고, 다음 턴부터 AI 대사를 쓴다.
+**상태 캐시가 핵심이다.** `QuestManager.quest_state_changed`가 발생하면 두 NPC의 다음 대사 후보를 백그라운드에서 만들어 상태별 캐시에 저장한다. 플레이어가 6m 안에 들어오면(`notice`) 캐시를 확인하고, 없을 때만 2초 제한 요청을 시작한다. 상호작용 시점까지 검증된 응답이 없으면 고정 대사를 즉시 표시한다.
 
 ## 4. Godot 구현 메모
 

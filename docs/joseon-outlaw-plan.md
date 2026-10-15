@@ -1,6 +1,6 @@
 # JOSEON OUTLAW — 향후 작업 계획
 
-> 상태: 아이디어 검토 및 기술 설계 단계
+> 상태: 사전 설계 초안 완료 · 1주차 기술 스파이크 대기
 >
 > 목표: 6명·7주 안에 Windows에서 8~10분간 완주 가능한 조선풍 오픈존 3D 액션 어드벤처 데모 제작
 >
@@ -103,8 +103,10 @@ AI 대화는 퀘스트 시작과 완료 지점에 집중한다. 자유 대화가
 
 - Python + FastAPI
 - 우선 HTTP JSON 사용
-- Ollama와 llama.cpp를 비교한 뒤 하나만 채택
-- 기준 PC에서 한국어 품질과 응답 시간을 만족하는 양자화 모델 선택
+- 퀘스트 진행은 고정 선택지와 게임 이벤트만 담당
+- 퀘스트 상태 변경 시 다음 NPC 대사를 백그라운드 생성해 캐시
+- 자유 입력은 2초 안에 검증된 응답이 없으면 고정 대사로 대체
+- qwen3:8b 실시간 방식은 제외하고, 3~4B 모델을 Ollama와 llama.cpp에서 한 번씩 비교해 하나만 채택
 - 데이터베이스 없이 메모리와 JSONL 로그로 시작
 
 ### TTS
@@ -336,25 +338,26 @@ LLM 응답만으로 퀘스트나 전투 상태가 변경되어서는 안 된다.
 
 ## 12. 지금부터 할 일
 
-구현을 시작하기 전 다음 순서대로 진행한다. 2026-10-14 검토에서 아트 디렉션·UI·사운드 항목을 추가하고 순서를 바꿨다.
-산출물은 [`projects/joseon-outlaw/`](../projects/joseon-outlaw/README.md)에 있고, 표시한 항목은 **초안 완료, 팀 확정 필요** 상태다.
+구현 전 준비 상태를 아래처럼 관리한다. **초안은 조사·작성 완료일 뿐 채택이나 구현 완료가 아니다.** `확정`은 실제 PC·엔진·에셋으로 검증한 뒤에만 사용한다.
 
-1. [ ] 팀원별 Godot, 3D, Python, AI 경험 조사 (특히 3D 아트·애니메이션 가능 여부)
-2. [x] 아트 디렉션 문서 — [02](../projects/joseon-outlaw/docs/02-art-direction.md)
-3. [x] 8~10분 시연 스토리보드 작성 — [03](../projects/joseon-outlaw/docs/03-storyboard.md)
-4. [x] 플레이어 모델과 공격·피격 애니메이션 후보 선정 — [04](../projects/joseon-outlaw/docs/04-character-animation.md)
-5. [x] 한옥·시장·숲 환경 에셋 후보와 라이선스 선정 — [05](../projects/joseon-outlaw/docs/05-environment-assets.md)
-6. [x] UI 시안과 서체 — [06](../projects/joseon-outlaw/docs/06-ui-design.md)
-7. [x] 사운드·BGM 수급 계획 — [07](../projects/joseon-outlaw/docs/07-audio-plan.md)
-8. [ ] 최종 시연 PC와 팀 내 최저 사양 PC 기록
-9. [x] Godot 후보 버전과 주요 플러그인 호환성 표 작성 — [09](../projects/joseon-outlaw/docs/09-godot-compat.md)
-10. [x] Ollama·llama.cpp와 LLM 후보 벤치마크 계획 작성 — [10](../projects/joseon-outlaw/docs/10-llm-benchmark-plan.md)
-11. [x] AI 요청·응답 JSON 스키마 확정 — [schemas](../projects/joseon-outlaw/schemas/)
-12. [x] 퀘스트 상태도와 NPC FSM 확정 — [12](../projects/joseon-outlaw/docs/12-quest-npc-fsm.md)
-13. [x] 저장소 브랜치, PR, 씬 소유권 규칙 확정 — [13](../projects/joseon-outlaw/docs/13-repo-rules.md)
-14. [x] 라이선스 대장 템플릿 생성 — [14](../projects/joseon-outlaw/docs/14-license-ledger.md)
+| # | 항목 | 현재 상태 | 확정 조건 |
+|---|---|---|---|
+| 1 | 팀원별 Godot·3D·Python·AI 경험 | 미입력 | 6명 응답과 담당 역할 기록 |
+| 2 | 아트 디렉션 | 초안 | 팀 리뷰와 실제 장면 테스트 |
+| 3 | 8~10분 시연 스토리보드 | 데이터 검증 | 회색박스 플레이 3회가 모두 10분 이내 |
+| 4 | 플레이어·애니메이션 | 후보 조사 | 다운로드·라이선스 승인·Godot 리타기팅 성공 |
+| 5 | 환경 에셋 | 후보 조사 | 다운로드·라이선스 승인·실제 씬 성능 확인 |
+| 6 | UI·서체 | 목업 검증 | Godot UI 적용과 한글 표시 확인 |
+| 7 | 사운드·BGM | 후보 조사 | 개별 파일 라이선스 승인 |
+| 8 | 시연 PC·최저 사양 PC | 미입력 | CPU·GPU·RAM·Windows 기록 |
+| 9 | Godot·플러그인 호환성 | 우선 후보 조사 | Windows 내보내기와 필요한 플러그인만 실기 검증 |
+| 10 | LLM 벤치마크 | 8B 불합격 | 3~4B 비교 후 모델·런타임 또는 선택지 방식 확정 |
+| 11 | AI 요청·응답 스키마 | 계약 테스트 통과 | Godot–FastAPI 실제 왕복 성공 |
+| 12 | 퀘스트·NPC FSM | 데이터 테스트 통과 | Godot 회색박스에서 전체 이벤트 재생 성공 |
+| 13 | 브랜치·PR·씬 소유권 | 초안 | 팀 담당자 입력과 브랜치 보호 적용 |
+| 14 | 라이선스 대장 | 검사 도구 완성 | 실제 채택 항목이 `approved` 조건 충족 |
 
-"1주차 기술 스파이크 실행 여부 결정"은 삭제했다. 결정할 문제가 아니라 1주차에 그냥 하는 일이다.
+산출물은 [`projects/joseon-outlaw/`](../projects/joseon-outlaw/README.md)에 있다. “1주차 기술 스파이크 실행 여부 결정”은 결정할 문제가 아니라 바로 실행할 작업이라 목록에서 제외했다.
 
 ## 13. 최종 완료 정의
 

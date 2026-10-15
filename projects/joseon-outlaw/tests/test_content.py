@@ -45,6 +45,11 @@ class Storyboard(unittest.TestCase):
             d = b["duration_s"]
             self.assertTrue(d["min"] <= d["target"] <= d["max"], b["id"])
 
+    def test_slow_run_fits_ten_minutes(self):
+        _, high = self.board["target_total_s"]
+        total = sum(b["duration_s"]["max"] for b in self.board["beats"])
+        self.assertLessEqual(total, high, f"slow run total {total}s")
+
     def test_beats_follow_the_quest_state_machine(self):
         state = self.quest["initial"]
         for beat in self.board["beats"]:
