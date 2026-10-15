@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -6,22 +6,38 @@
 [ext_resource type="PackedScene" path="res://scenes/npc.tscn" id="4_npc"]
 [ext_resource type="PackedScene" path="res://scenes/bandit.tscn" id="5_bandit"]
 [ext_resource type="PackedScene" path="res://scenes/quest_object.tscn" id="6_quest_object"]
+[ext_resource type="FontFile" path="res://assets/fonts/song-myung/SongMyung-Regular.ttf" id="7_display"]
+[ext_resource type="FontFile" path="res://assets/fonts/gowun-batang/GowunBatang-Regular.ttf" id="8_body"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_dusk"]
+sky_top_color = Color(0.12, 0.2, 0.28, 1)
+sky_horizon_color = Color(0.78, 0.48, 0.31, 1)
+ground_bottom_color = Color(0.08, 0.1, 0.11, 1)
+ground_horizon_color = Color(0.48, 0.35, 0.27, 1)
+sun_angle_max = 16.0
+sun_curve = 0.08
+
+[sub_resource type="Sky" id="Sky_dusk"]
+sky_material = SubResource("SkyMaterial_dusk")
 
 [sub_resource type="Environment" id="Environment_main"]
-background_mode = 1
-background_color = Color(0.36, 0.55, 0.65, 1)
+background_mode = 2
+sky = SubResource("Sky_dusk")
 ambient_light_source = 3
-ambient_light_color = Color(0.72, 0.68, 0.58, 1)
-ambient_light_energy = 0.7
+ambient_light_color = Color(0.62, 0.59, 0.54, 1)
+ambient_light_energy = 0.6
+reflected_light_source = 2
+tonemap_mode = 3
 fog_enabled = true
-fog_light_color = Color(0.62, 0.68, 0.66, 1)
-fog_density = 0.003
+fog_light_color = Color(0.53, 0.57, 0.57, 1)
+fog_density = 0.006
+fog_sky_affect = 0.55
 
 [sub_resource type="PlaneMesh" id="Plane_ground"]
 size = Vector2(60, 140)
 
 [sub_resource type="StandardMaterial3D" id="Material_ground"]
-albedo_color = Color(0.22, 0.31, 0.18, 1)
+albedo_color = Color(0.18, 0.27, 0.16, 1)
 roughness = 1.0
 
 [sub_resource type="BoxShape3D" id="Shape_ground"]
@@ -37,29 +53,49 @@ size = Vector3(5, 2.5, 0.4)
 albedo_color = Color(0.42, 0.31, 0.2, 1)
 roughness = 0.95
 
-[sub_resource type="StyleBoxFlat" id="Panel_style"]
-bg_color = Color(0.08, 0.07, 0.06, 0.88)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.77, 0.60, 0.29, 1)
-corner_radius_top_left = 6
-corner_radius_top_right = 6
-corner_radius_bottom_right = 6
-corner_radius_bottom_left = 6
+[sub_resource type="StyleBoxFlat" id="Panel_ink"]
+bg_color = Color(0.055, 0.047, 0.043, 0.94)
+border_width_left = 4
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.77, 0.59, 0.27, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 8
 
-[sub_resource type="StyleBoxFlat" id="Scroll_style"]
+[sub_resource type="StyleBoxFlat" id="Panel_scroll"]
 bg_color = Color(0.945, 0.906, 0.827, 0.96)
 border_width_left = 5
-border_width_top = 2
+border_width_top = 1
 border_width_right = 5
-border_width_bottom = 2
-border_color = Color(0.16, 0.14, 0.12, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
+border_width_bottom = 1
+border_color = Color(0.22, 0.17, 0.12, 0.95)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+
+[sub_resource type="StyleBoxFlat" id="Health_background"]
+bg_color = Color(0.08, 0.07, 0.06, 0.9)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="Health_fill"]
+bg_color = Color(0.66, 0.22, 0.16, 1)
+border_width_right = 2
+border_color = Color(0.89, 0.62, 0.28, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
@@ -68,10 +104,11 @@ script = ExtResource("1_main")
 environment = SubResource("Environment_main")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-48, -32, 0)
-light_color = Color(1, 0.75, 0.48, 1)
-light_energy = 1.2
+rotation_degrees = Vector3(-24, -38, 0)
+light_color = Color(1, 0.63, 0.39, 1)
+light_energy = 1.45
 shadow_enabled = true
+directional_shadow_max_distance = 90.0
 
 [node name="Ground" type="StaticBody3D" parent="."]
 
@@ -87,6 +124,7 @@ shape = SubResource("Shape_ground")
 position = Vector3(4, 1.25, 2)
 
 [node name="Mesh" type="MeshInstance3D" parent="CameraWall"]
+visible = false
 mesh = SubResource("Mesh_wall")
 material_override = SubResource("Material_wall")
 
@@ -127,153 +165,205 @@ position = Vector3(0, 0.05, 8)
 
 [node name="UI" type="CanvasLayer" parent="."]
 
+[node name="Brand" type="Label" parent="UI"]
+offset_left = 490.0
+offset_top = 20.0
+offset_right = 790.0
+offset_bottom = 62.0
+theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.04, 0.03, 0.9)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 3
+theme_override_fonts/font = ExtResource("7_display")
+theme_override_font_sizes/font_size = 26
+text = "조선 아웃로우"
+horizontal_alignment = 1
+
 [node name="HelpPanel" type="PanelContainer" parent="UI"]
-offset_left = 28.0
-offset_top = 28.0
-offset_right = 468.0
-offset_bottom = 126.0
-theme_override_styles/panel = SubResource("Panel_style")
+offset_left = 26.0
+offset_top = 26.0
+offset_right = 386.0
+offset_bottom = 103.0
+theme_override_styles/panel = SubResource("Panel_ink")
 
 [node name="Margin" type="MarginContainer" parent="UI/HelpPanel"]
 theme_override_constants/margin_left = 16
-theme_override_constants/margin_top = 10
+theme_override_constants/margin_top = 9
 theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 10
+theme_override_constants/margin_bottom = 9
 
 [node name="Text" type="Label" parent="UI/HelpPanel/Margin"]
-text = "WASD 이동 · Shift 달리기 · Space 점프\n좌클릭 검 공격 · E 대화 · P 멈춤 · F1 도움말"
-theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.86, 0.81, 0.72, 1)
+theme_override_fonts/font = ExtResource("8_body")
+theme_override_font_sizes/font_size = 14
+text = "WASD 이동 · Shift 달리기 · Space 점프\n좌클릭 공격 · E 대화 · P 멈춤 · F1 도움말"
 
 [node name="ObjectivePanel" type="PanelContainer" parent="UI"]
-offset_left = 830.0
-offset_top = 28.0
-offset_right = 1250.0
-offset_bottom = 134.0
-theme_override_styles/panel = SubResource("Scroll_style")
+offset_left = 866.0
+offset_top = 26.0
+offset_right = 1254.0
+offset_bottom = 123.0
+theme_override_styles/panel = SubResource("Panel_scroll")
 
 [node name="Margin" type="MarginContainer" parent="UI/ObjectivePanel"]
 theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 12
+theme_override_constants/margin_top = 11
 theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_bottom = 11
 
 [node name="Objective" type="Label" parent="UI/ObjectivePanel/Margin"]
+theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
+theme_override_fonts/font = ExtResource("7_display")
+theme_override_font_sizes/font_size = 18
 text = "의뢰 · 윤 행수와 이야기하시오"
 autowrap_mode = 2
-theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
-theme_override_font_sizes/font_size = 19
 
 [node name="Prompt" type="Label" parent="UI"]
-offset_left = 440.0
-offset_top = 584.0
-offset_right = 840.0
-offset_bottom = 626.0
-text = ""
-horizontal_alignment = 1
+offset_left = 390.0
+offset_top = 592.0
+offset_right = 890.0
+offset_bottom = 636.0
 theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
 theme_override_constants/shadow_offset_x = 2
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 22
+theme_override_fonts/font = ExtResource("8_body")
+theme_override_font_sizes/font_size = 21
+text = ""
+horizontal_alignment = 1
 
 [node name="Dialogue" type="PanelContainer" parent="UI"]
 visible = false
-offset_left = 190.0
-offset_top = 510.0
-offset_right = 1090.0
+offset_left = 174.0
+offset_top = 508.0
+offset_right = 1106.0
 offset_bottom = 688.0
-theme_override_styles/panel = SubResource("Panel_style")
+theme_override_styles/panel = SubResource("Panel_ink")
 
 [node name="Margin" type="MarginContainer" parent="UI/Dialogue"]
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 18
-theme_override_constants/margin_right = 28
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 17
+theme_override_constants/margin_right = 30
 theme_override_constants/margin_bottom = 18
 
-[node name="Text" type="Label" parent="UI/Dialogue/Margin"]
-text = "윤 행수\n대화 내용"
-autowrap_mode = 2
+[node name="Stack" type="VBoxContainer" parent="UI/Dialogue/Margin"]
+theme_override_constants/separation = 8
+
+[node name="Speaker" type="Label" parent="UI/Dialogue/Margin/Stack"]
+theme_override_colors/font_color = Color(0.79, 0.58, 0.25, 1)
+theme_override_fonts/font = ExtResource("7_display")
+theme_override_font_sizes/font_size = 23
+text = "윤 행수"
+
+[node name="Text" type="Label" parent="UI/Dialogue/Margin/Stack"]
+size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_fonts/font = ExtResource("8_body")
+theme_override_font_sizes/font_size = 20
+text = "대화 내용"
+autowrap_mode = 2
 
 [node name="HealthPanel" type="PanelContainer" parent="UI"]
-offset_left = 28.0
-offset_top = 138.0
-offset_right = 245.0
+offset_left = 26.0
+offset_top = 118.0
+offset_right = 302.0
 offset_bottom = 190.0
-theme_override_styles/panel = SubResource("Panel_style")
+theme_override_styles/panel = SubResource("Panel_ink")
 
 [node name="Margin" type="MarginContainer" parent="UI/HealthPanel"]
 theme_override_constants/margin_left = 16
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 16
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_bottom = 10
 
-[node name="Health" type="Label" parent="UI/HealthPanel/Margin"]
-text = "체력 100 / 100"
-theme_override_colors/font_color = Color(0.92, 0.38, 0.28, 1)
-theme_override_font_sizes/font_size = 18
+[node name="Stack" type="VBoxContainer" parent="UI/HealthPanel/Margin"]
+theme_override_constants/separation = 5
+
+[node name="Health" type="Label" parent="UI/HealthPanel/Margin/Stack"]
+theme_override_colors/font_color = Color(0.93, 0.79, 0.58, 1)
+theme_override_fonts/font = ExtResource("7_display")
+theme_override_font_sizes/font_size = 16
+text = "생명 100 / 100"
+
+[node name="HealthBar" type="ProgressBar" parent="UI/HealthPanel/Margin/Stack"]
+custom_minimum_size = Vector2(0, 12)
+value = 100.0
+show_percentage = false
+theme_override_styles/background = SubResource("Health_background")
+theme_override_styles/fill = SubResource("Health_fill")
 
 [node name="EndPanel" type="PanelContainer" parent="UI"]
 visible = false
-offset_left = 370.0
-offset_top = 210.0
-offset_right = 910.0
-offset_bottom = 380.0
-theme_override_styles/panel = SubResource("Scroll_style")
+offset_left = 358.0
+offset_top = 202.0
+offset_right = 922.0
+offset_bottom = 390.0
+theme_override_styles/panel = SubResource("Panel_scroll")
 
 [node name="Margin" type="MarginContainer" parent="UI/EndPanel"]
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 22
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 22
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 24
 
 [node name="Text" type="Label" parent="UI/EndPanel/Margin"]
-text = "의뢰 완료\n장부를 되찾고 보상 50냥을 받았습니다"
+theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
+theme_override_fonts/font = ExtResource("7_display")
+theme_override_font_sizes/font_size = 25
+text = "의뢰 완료\n\n장부를 되찾고 보상 50냥을 받았습니다"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
-theme_override_font_sizes/font_size = 24
 
 [node name="TutorialPanel" type="PanelContainer" parent="UI"]
-offset_left = 350.0
-offset_top = 145.0
-offset_right = 930.0
-offset_bottom = 330.0
-theme_override_styles/panel = SubResource("Scroll_style")
+offset_left = 340.0
+offset_top = 148.0
+offset_right = 940.0
+offset_bottom = 350.0
+theme_override_styles/panel = SubResource("Panel_scroll")
 
 [node name="Margin" type="MarginContainer" parent="UI/TutorialPanel"]
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 20
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 22
 
-[node name="Text" type="Label" parent="UI/TutorialPanel/Margin"]
-text = "청송골의 빼앗긴 장부\n\n윤 행수에게 말을 걸고 북쪽 산길로 가십시오.\nWASD 이동 · 좌클릭 공격 · E 상호작용 · F1 도움말"
+[node name="Stack" type="VBoxContainer" parent="UI/TutorialPanel/Margin"]
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="UI/TutorialPanel/Margin/Stack"]
+theme_override_colors/font_color = Color(0.42, 0.16, 0.12, 1)
+theme_override_fonts/font = ExtResource("7_display")
+theme_override_font_sizes/font_size = 28
+text = "청송골의 빼앗긴 장부"
 horizontal_alignment = 1
-vertical_alignment = 1
+
+[node name="Text" type="Label" parent="UI/TutorialPanel/Margin/Stack"]
 theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_fonts/font = ExtResource("8_body")
+theme_override_font_sizes/font_size = 18
+text = "윤 행수에게 말을 걸고 북쪽 산길로 가십시오.\nWASD 이동 · 좌클릭 공격 · E 상호작용 · F1 도움말"
+horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="PausePanel" type="PanelContainer" parent="UI"]
 visible = false
 process_mode = 3
 offset_left = 420.0
-offset_top = 235.0
+offset_top = 230.0
 offset_right = 860.0
-offset_bottom = 445.0
-theme_override_styles/panel = SubResource("Panel_style")
+offset_bottom = 450.0
+theme_override_styles/panel = SubResource("Panel_ink")
 
 [node name="Margin" type="MarginContainer" parent="UI/PausePanel"]
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 20
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 24
 
 [node name="Text" type="Label" parent="UI/PausePanel/Margin"]
+theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
+theme_override_fonts/font = ExtResource("7_display")
+theme_override_font_sizes/font_size = 23
 text = "잠시 멈춤\n\nP 계속하기 · F1 도움말\n[ / ] 음량 조절"
 horizontal_alignment = 1
 vertical_alignment = 1
-theme_override_colors/font_color = Color(0.945, 0.906, 0.827, 1)
-theme_override_font_sizes/font_size = 22

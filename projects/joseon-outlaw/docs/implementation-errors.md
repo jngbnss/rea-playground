@@ -115,3 +115,13 @@
 - 원인: CI의 빈 import 캐시를 고려하지 않은 제한과 `GODOT_BIN` 환경 변수를 무시한 통합 도구
 - 복구: CI에서 프로젝트 import 단계를 먼저 수행하고 스모크 제한을 180초로 늘렸다. AI 통합 도구도 `GODOT_BIN`을 사용하게 변경했다. Linux Godot·FastAPI·10회 완주·Windows 내보내기·아티팩트 업로드가 1분 43초에 통과했다.
 - 상태: 해결
+
+## 비주얼 업그레이드
+
+### VU-E001 · 신규 TTF 첫 실행에서 리소스 로더 미등록
+
+- 발생 단계: 실게임 렌더 캡처
+- 증상: 게임은 대체 서체로 실행됐지만 두 TTF에 `No loader found for resource` 오류가 발생
+- 원인: 신규 폰트를 Godot 에디터 import 전에 런타임 씬에서 바로 불러옴
+- 복구: `godot --headless --editor --path game --quit`으로 import를 선행한 뒤 같은 GUI 스모크를 재실행했다. 오류 없이 두 서체와 UI가 렌더되고 페이즈 7 전체 스모크가 통과했다.
+- 상태: 해결

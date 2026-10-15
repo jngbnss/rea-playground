@@ -2,6 +2,8 @@
 
 Godot 4.7.2로 구현한 3인칭 조선 활극 수직 슬라이스. 윤 행수의 장부 의뢰를 받아 산길의 도적 둘을 제압하고 장부를 되찾아 보상받는 흐름을 처음부터 끝까지 플레이할 수 있다. 외부 게임 에셋 없이 절차 생성 메시·UI·사운드를 사용한다.
 
+![조선 아웃로우 실게임](docs/evidence/game/design-upgrade.png)
+
 ## 자동 검사와 미리보기
 
 - [GitHub Actions](https://github.com/jngbnss/rea-playground/actions/workflows/joseon-outlaw.yml): Python·Godot·FastAPI 통합 검사, 10회 연속 완주, Windows 빌드 아티팩트
@@ -10,7 +12,8 @@ Godot 4.7.2로 구현한 3인칭 조선 활극 수직 슬라이스. 윤 행수�
 ## 구현 범위
 
 - 3인칭 이동·달리기·점프·카메라 충돌과 검 전투
-- 조선 마을·산길·도적 소굴, NPC 2명, 도적 AI 2명
+- 해 질 녘 조선 마을·산길·도적 소굴, 창호 조명·등불·모닥불·안개·겹산
+- Song Myung·Gowun Batang 기반 먹색 HUD와 한지 의뢰서·대화창
 - 의뢰 수락·장부 회수·지름길·제출·보상·엔딩, 체크포인트 부활
 - FastAPI/Ollama 상태별 대사 캐시와 2초 제한·정책 검증·고정 대사 fallback
 - 튜토리얼, 일시정지, 음량, 성능 로그, 절차 생성 배경음
@@ -51,6 +54,8 @@ python -m tools.export_windows --phase 7
 AI 대사는 선택 기능이다. `ollama serve`와 `qwen3:4b-instruct`를 준비한 뒤 `python -m uvicorn ai_server.app:app --host 127.0.0.1 --port 8765`를 실행한다. 서버가 없거나 2초를 넘기거나 검증에 실패해도 고정 대사로 전체 게임을 완주할 수 있다.
 
 에디터에서는 `game/project.godot`을 연다. 기준 PC와 도구 버전은 [`docs/environment.md`](docs/environment.md), 단계별 완료 기준은 [`docs/implementation-checklist.md`](docs/implementation-checklist.md), 구현 중 오류는 [`docs/implementation-errors.md`](docs/implementation-errors.md)에 기록한다.
+
+외부 서체 라이선스와 고지는 [`CREDITS.md`](CREDITS.md), 원본 해시·승인 상태는 [`data/license-ledger.csv`](data/license-ledger.csv)에 있다.
 
 ## 11. AI 계약 요약
 
