@@ -1,2 +1,6 @@
 __pycache__/
 *.pyc
+
+# Godot editor cache and local exports
+game/.godot/
+game/build/
