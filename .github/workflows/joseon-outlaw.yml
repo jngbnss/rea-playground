@@ -49,6 +49,8 @@ jobs:
           unzip -q /tmp/templates.tpz -d /tmp/export-templates
           mkdir -p "$HOME/.local/share/godot/export_templates/4.7.2.stable"
           cp -R /tmp/export-templates/templates/. "$HOME/.local/share/godot/export_templates/4.7.2.stable/"
+      - name: Import Godot project
+        run: '"$GODOT_BIN" --headless --path game --editor --quit-after 10'
       - name: Run Godot and API integration
         run: |
           python -m tools.godot_smoke --phase 7
