@@ -11,6 +11,7 @@ extends Node3D
 
 func _ready() -> void:
     add_to_group("interactable")
+    add_to_group("villagers")
     name_label.text = display_name
     var material := body.material_override.duplicate() as StandardMaterial3D
     material.albedo_color = accent_color
@@ -30,7 +31,8 @@ func interact() -> Dictionary:
             QuestManager.ACCEPTED:
                 return {"speaker": display_name, "text": "산길 끝 모닥불 근처를 살펴보시오."}
             QuestManager.ITEM_RECOVERED:
-                return {"speaker": display_name, "text": "장부를 찾았구려! 이제 안심이오."}
+                QuestManager.complete_quest()
+                return {"speaker": display_name, "text": "장부를 찾았구려! 약속한 쉰 냥을 받으시오."}
             QuestManager.COMPLETED:
                 return {"speaker": display_name, "text": "큰 은혜를 입었소. 쉰 냥을 잘 쓰시오."}
     match QuestManager.state:

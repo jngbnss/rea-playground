@@ -1,10 +1,11 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
 [ext_resource type="Script" path="res://scripts/world.gd" id="3_world"]
 [ext_resource type="PackedScene" path="res://scenes/npc.tscn" id="4_npc"]
 [ext_resource type="PackedScene" path="res://scenes/bandit.tscn" id="5_bandit"]
+[ext_resource type="PackedScene" path="res://scenes/quest_object.tscn" id="6_quest_object"]
 
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 1
@@ -113,6 +114,14 @@ position = Vector3(-2, 0, -46)
 [node name="BanditB" parent="World" instance=ExtResource("5_bandit")]
 position = Vector3(3, 0, -50)
 
+[node name="LedgerChest" parent="World" instance=ExtResource("6_quest_object")]
+position = Vector3(0, 0, -54)
+
+[node name="VillageShortcut" parent="World" instance=ExtResource("6_quest_object")]
+position = Vector3(7, 0, -54)
+object_kind = "village_shortcut"
+display_name = "마을 지름길"
+
 [node name="Player" parent="." instance=ExtResource("2_player")]
 position = Vector3(0, 0.05, 8)
 
@@ -205,3 +214,24 @@ theme_override_constants/margin_bottom = 8
 text = "체력 100 / 100"
 theme_override_colors/font_color = Color(0.92, 0.38, 0.28, 1)
 theme_override_font_sizes/font_size = 18
+
+[node name="EndPanel" type="PanelContainer" parent="UI"]
+visible = false
+offset_left = 370.0
+offset_top = 210.0
+offset_right = 910.0
+offset_bottom = 380.0
+theme_override_styles/panel = SubResource("Scroll_style")
+
+[node name="Margin" type="MarginContainer" parent="UI/EndPanel"]
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 22
+
+[node name="Text" type="Label" parent="UI/EndPanel/Margin"]
+text = "의뢰 완료\n장부를 되찾고 보상 50냥을 받았습니다"
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_colors/font_color = Color(0.118, 0.102, 0.09, 1)
+theme_override_font_sizes/font_size = 24
