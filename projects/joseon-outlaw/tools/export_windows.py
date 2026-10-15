@@ -25,6 +25,7 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--godot", type=Path, default=Path(os.environ.get("GODOT_BIN", DEFAULT_BIN)))
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--phase", type=int, default=1)
     args = parser.parse_args()
 
     if not args.godot.is_file():
@@ -38,10 +39,11 @@ def main() -> int:
     if not args.output.is_file():
         raise SystemExit(f"Export did not create {args.output}")
 
-    completed = run([str(args.output), "--headless", "--", "--smoke-phase=1"])
-    if "SMOKE_OK phase=1" not in completed.stdout + completed.stderr:
-        raise SystemExit("Exported build did not emit the phase 1 smoke marker")
-    print(f"EXPORT_OK path={args.output} bytes={args.output.stat().st_size}")
+    completed = run([str(args.output), "--headless", "--", f"--smoke-phase={args.phase}"])
+    marker = f"SMOKE_OK phase={args.phase}"
+    if marker not in completed.stdout + completed.stderr:
+        raise SystemExit(f"Exported build did not emit {marker!r}")
+    print(f"EXPORT_OK phase={args.phase} path={args.output} bytes={args.output.stat().st_size}")
     return 0
 
 
