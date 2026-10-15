@@ -2,26 +2,38 @@ class_name PlayerController
 extends CharacterBody3D
 
 signal movement_state_changed(state: String)
+signal health_changed(current: int, maximum: int)
+signal died
 
 @export var walk_speed := 4.5
 @export var run_speed := 7.5
 @export var acceleration := 18.0
 @export var jump_velocity := 6.0
 @export var mouse_sensitivity := 0.0025
+@export var max_health := 100
+@export var attack_damage := 20
+@export var attack_range := 2.8
 
 @onready var visual: Node3D = $Visual
+@onready var sword: MeshInstance3D = $Visual/Sword
 @onready var camera_rig: Node3D = $CameraRig
 @onready var pitch: Node3D = $CameraRig/Pitch
 
 var movement_state := "idle"
+var health := 100
+var is_dead := false
 var _test_enabled := false
 var _test_input := Vector2.ZERO
 var _test_sprint := false
 var _test_jump := false
+var _attack_ready := true
+var _attack_tween: Tween
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 
 func _ready() -> void:
+    add_to_group("player")
+    health = max_health
     _ensure_input_actions()
     var smoke_run := false
     for argument in OS.get_cmdline_user_args():
@@ -41,29 +53,81 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _physics_process(delta: float) -> void:
+    if is_dead:
+        return
     var input_vector := _test_input if _test_enabled else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
     var sprinting := _test_sprint if _test_enabled else Input.is_action_pressed("sprint")
     var wants_jump := _consume_test_jump() if _test_enabled else Input.is_action_just_pressed("jump")
     _move(input_vector, sprinting, wants_jump, delta)
+    if not _test_enabled and Input.is_action_just_pressed("attack"):
+        attack()
 
 
 func _move(input_vector: Vector2, sprinting: bool, wants_jump: bool, delta: float) -> void:
     var camera_basis := Basis(Vector3.UP, camera_rig.global_rotation.y)
     var direction := (camera_basis * Vector3(input_vector.x, 0.0, input_vector.y)).normalized()
     var speed := run_speed if sprinting else walk_speed
-    var target := direction * speed
-    velocity.x = move_toward(velocity.x, target.x, acceleration * delta)
-    velocity.z = move_toward(velocity.z, target.z, acceleration * delta)
-
+    var target_velocity := direction * speed
+    velocity.x = move_toward(velocity.x, target_velocity.x, acceleration * delta)
+    velocity.z = move_toward(velocity.z, target_velocity.z, acceleration * delta)
     if not is_on_floor():
         velocity.y -= _gravity * delta
     elif wants_jump:
         velocity.y = jump_velocity
-
     move_and_slide()
     if direction.length_squared() > 0.01:
         visual.rotation.y = lerp_angle(visual.rotation.y, atan2(direction.x, direction.z), minf(1.0, 12.0 * delta))
     _set_movement_state(direction, sprinting)
+
+
+func attack() -> int:
+    if not _attack_ready or is_dead:
+        return 0
+    _attack_ready = false
+    _animate_attack()
+    get_tree().create_timer(0.35).timeout.connect(func() -> void: _attack_ready = true)
+    var hits := 0
+    var forward := -visual.global_basis.z.normalized()
+    for candidate in get_tree().get_nodes_in_group("enemies"):
+        var enemy := candidate as Node3D
+        if enemy == null:
+            continue
+        var offset := enemy.global_position - global_position
+        var flat_offset := Vector3(offset.x, 0.0, offset.z)
+        if flat_offset.length() <= attack_range and forward.dot(flat_offset.normalized()) >= 0.25:
+            if enemy.call("take_damage", attack_damage, self):
+                hits += 1
+    return hits
+
+
+func receive_damage(amount: int) -> bool:
+    if is_dead or amount <= 0:
+        return false
+    health = maxi(0, health - amount)
+    health_changed.emit(health, max_health)
+    if health == 0:
+        is_dead = true
+        velocity = Vector3.ZERO
+        visual.rotation_degrees.z = 90.0
+        died.emit()
+    return true
+
+
+func restore_at(checkpoint: Vector3) -> void:
+    global_position = checkpoint
+    velocity = Vector3.ZERO
+    health = max_health
+    is_dead = false
+    visual.rotation = Vector3.ZERO
+    health_changed.emit(health, max_health)
+
+
+func _animate_attack() -> void:
+    if _attack_tween != null and _attack_tween.is_valid():
+        _attack_tween.kill()
+    _attack_tween = create_tween()
+    _attack_tween.tween_property(sword, "rotation_degrees:z", -95.0, 0.1)
+    _attack_tween.tween_property(sword, "rotation_degrees:z", -8.0, 0.2)
 
 
 func _set_movement_state(direction: Vector3, sprinting: bool) -> void:
@@ -113,3 +177,8 @@ func _ensure_input_actions() -> void:
         var event := InputEventKey.new()
         event.physical_keycode = actions[action]
         InputMap.action_add_event(action, event)
+    if not InputMap.has_action(&"attack"):
+        InputMap.add_action(&"attack")
+        var mouse_event := InputEventMouseButton.new()
+        mouse_event.button_index = MOUSE_BUTTON_LEFT
+        InputMap.action_add_event(&"attack", mouse_event)
