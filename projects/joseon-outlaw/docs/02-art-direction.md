@@ -1,7 +1,7 @@
 # 02. 아트 디렉션
 
-> 상태: **게임 적용 완료.** 절차형 조선 마을·산길·도적 소굴, 해 질 녘 하늘, 안개, AgX, 창호·등불·모닥불 조명을 구현했다.
-> 팔레트 원본: [`data/palette.json`](../data/palette.json), 실게임 증거: [`evidence/game/design-upgrade.png`](evidence/game/design-upgrade.png)
+> 상태: **현실적 CC0 PBR 전환 완료.** 절차형 조선 마을·산길·도적 소굴에 실측 기반 PBR 재질, HDRI 하늘, 안개, AgX, 창호·등불·모닥불 조명을 적용했다.
+> 팔레트 원본: [`data/palette.json`](../data/palette.json), 실게임 증거: [`evidence/game/realistic-open-source.png`](evidence/game/realistic-open-source.png)
 
 ## 1. 한 줄 정의
 
@@ -18,7 +18,7 @@
 
 **원칙: 형태는 단순하게, 빛은 풍부하게.** 데모의 인상은 모델 디테일보다 조명과 공기에서 나온다.
 
-구현은 외부 3D 에셋을 섞지 않고 Godot 절차형 메시와 프로젝트 팔레트로 통일했다. 한옥 창살, 과장된 처마, 돌담, 장독대, 소나무, 겹산 실루엣을 동일 재질 규칙으로 생성하므로 출처별 스타일 편차와 불필요한 런타임 텍스처 비용이 없다.
+형태는 직접 만든 절차형 메시로 유지하고 표면과 하늘은 Poly Haven CC0 원본을 사용한다. 1K diffuse·OpenGL normal·roughness 세트를 회벽, 목재, 기와, 흙길, 숲 지면에 연결했다. 한옥 창살, 과장된 처마, 돌담, 장독대, 소나무, 겹산은 동일 재질 규칙을 사용한다.
 
 ## 3. 레퍼런스
 

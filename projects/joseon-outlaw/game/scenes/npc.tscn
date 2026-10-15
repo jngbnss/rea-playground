@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://scripts/npc.gd" id="1_npc"]
 
@@ -10,6 +10,21 @@ height = 1.35
 radius = 0.27
 height = 0.54
 
+
+[sub_resource type="CylinderMesh" id="Mesh_robe"]
+top_radius = 0.3
+bottom_radius = 0.46
+height = 1.0
+radial_segments = 18
+
+[sub_resource type="CapsuleMesh" id="Mesh_arm"]
+radius = 0.09
+height = 0.72
+radial_segments = 10
+rings = 4
+
+[sub_resource type="BoxMesh" id="Mesh_foot"]
+size = Vector3(0.2, 0.11, 0.34)
 [sub_resource type="StandardMaterial3D" id="Material_body"]
 albedo_color = Color(0.65, 0.25, 0.18, 1)
 roughness = 0.9
@@ -35,6 +50,33 @@ script = ExtResource("1_npc")
 position = Vector3(0, 0.76, 0)
 mesh = SubResource("Mesh_body")
 material_override = SubResource("Material_body")
+
+[node name="Robe" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.5, 0)
+mesh = SubResource("Mesh_robe")
+material_override = SubResource("Material_body")
+
+[node name="ArmLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-0.43, 1.02, 0)
+rotation_degrees = Vector3(0, 0, -8)
+mesh = SubResource("Mesh_arm")
+material_override = SubResource("Material_body")
+
+[node name="ArmRight" type="MeshInstance3D" parent="."]
+position = Vector3(0.43, 1.02, 0)
+rotation_degrees = Vector3(0, 0, 8)
+mesh = SubResource("Mesh_arm")
+material_override = SubResource("Material_body")
+
+[node name="FootLeft" type="MeshInstance3D" parent="."]
+position = Vector3(-0.19, 0.07, -0.04)
+mesh = SubResource("Mesh_foot")
+material_override = SubResource("Material_hat")
+
+[node name="FootRight" type="MeshInstance3D" parent="."]
+position = Vector3(0.19, 0.07, -0.04)
+mesh = SubResource("Mesh_foot")
+material_override = SubResource("Material_hat")
 
 [node name="Head" type="MeshInstance3D" parent="."]
 position = Vector3(0, 1.55, 0)

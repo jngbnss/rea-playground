@@ -1,21 +1,22 @@
 # 05. 환경 에셋 후보와 라이선스
 
-> 상태: 후보 선정 초안 (조사일 2026-10-14). **최종 선택은 팀 결정 사항.**
-> 각 후보의 라이선스는 [`data/license-ledger.csv`](../data/license-ledger.csv)의 `environment`, `texture` 항목
+> 상태: **CC0 자산 선정·게임 적용 완료 (2026-10-15).**
+> 승인 원본과 해시: [`data/license-ledger.csv`](../data/license-ledger.csv)의 `polyhaven-*` 항목
 
 ## 결론 먼저
 
-**출처를 섞지 말고, 한옥은 "모듈 키트 하나"를 직접 만든다.** 데모가 싸 보이는 가장 큰 원인은 출처가 다른 에셋의 화풍·텍셀 밀도·재질이 서로 다른 것이다.
+**저작권 위험이 없는 Poly Haven CC0만 최종 빌드에 채택했다.** 한옥 형태는 자체 절차형 모듈로 유지하고 표면 현실감과 환경광만 검증된 오픈소스 원본으로 교체했다.
 
-| 구역 | 1안 (무료, 작업량 많음) | 2안 (유료, 작업량 적음) |
+| 적용 영역 | 최종 자산 | 적용 맵 |
 |---|---|---|
-| 한옥·초가 | KCISA 스캔(창원의 집, 수내동 초가)에서 **모듈 키트를 키트배싱**하고 손으로 그린 텍스처를 베이크 | Fab "Stylized Korean Traditional House & Village Prop" (약 18.99달러, **직접 확인 필요**) |
-| 장터 소품 | 국가유산청 KHS_Asset 소품(이미 저폴리) + 장독은 직접 모델링 | 2안 팩에 옹기가 포함된 것으로 소개됨 |
-| 숲·바위·풀 | Quaternius Stylized Nature MegaKit을 소나무 느낌으로 재채색 | 같음 |
-| 하늘·조명 레퍼런스 | Poly Haven HDRI | 같음 |
-| 바탕 텍스처 | ambientCG, Poly Haven을 단순화·리페인트 | 같음 |
+| 숲 지면 | Poly Haven Forest Ground 04 | diffuse·normal·roughness |
+| 흙길 | Poly Haven Dirt Floor | diffuse·normal·roughness |
+| 한옥 회벽 | Poly Haven Plastered Wall 02 | diffuse·normal·roughness |
+| 기둥·문 | Poly Haven Weathered Brown Planks | diffuse·normal·roughness |
+| 기와 | Poly Haven Grey Roof Tiles | diffuse·normal·roughness |
+| 하늘·환경광 | Poly Haven Qwantani Dusk 1 Pure Sky | 1K HDRI |
 
-**권장: 1주차에 2안 팩을 직접 열어 보고**, 화풍이 아트 디렉션(02번)과 맞으면 2안으로 가고 남는 시간을 조명과 연출에 쓴다. 맞지 않으면 1안이다. 1안은 월드 아트 담당이 Blender를 다룰 수 있어야 한다.
+전부 `CC0 1.0`이며 상업 이용·수정·게임 빌드 재배포가 가능하고 저작자 표시 의무가 없다. 그래도 출처 추적을 위해 `CREDITS.md`와 라이선스 대장에 이름·URL·파일 해시를 남겼다. 외부 게임을 추출하거나 디컴파일한 자산은 사용하지 않았다.
 
 ## 1. 한국 공공 출처
 

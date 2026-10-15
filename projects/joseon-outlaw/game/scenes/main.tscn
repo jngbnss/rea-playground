@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
@@ -8,14 +8,14 @@
 [ext_resource type="PackedScene" path="res://scenes/quest_object.tscn" id="6_quest_object"]
 [ext_resource type="FontFile" path="res://assets/fonts/song-myung/SongMyung-Regular.ttf" id="7_display"]
 [ext_resource type="FontFile" path="res://assets/fonts/gowun-batang/GowunBatang-Regular.ttf" id="8_body"]
+[ext_resource type="Texture2D" path="res://assets/polyhaven/qwantani_dusk_1_puresky/qwantani_dusk_1_puresky_1k.hdr" id="9_sky"]
+[ext_resource type="Texture2D" path="res://assets/polyhaven/forest_ground_04/forest_ground_04_diff_1k.jpg" id="10_ground_diff"]
+[ext_resource type="Texture2D" path="res://assets/polyhaven/forest_ground_04/forest_ground_04_nor_gl_1k.jpg" id="11_ground_normal"]
+[ext_resource type="Texture2D" path="res://assets/polyhaven/forest_ground_04/forest_ground_04_rough_1k.jpg" id="12_ground_rough"]
 
-[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_dusk"]
-sky_top_color = Color(0.12, 0.2, 0.28, 1)
-sky_horizon_color = Color(0.78, 0.48, 0.31, 1)
-ground_bottom_color = Color(0.08, 0.1, 0.11, 1)
-ground_horizon_color = Color(0.48, 0.35, 0.27, 1)
-sun_angle_max = 16.0
-sun_curve = 0.08
+[sub_resource type="PanoramaSkyMaterial" id="SkyMaterial_dusk"]
+panorama = ExtResource("9_sky")
+energy_multiplier = 0.82
 
 [sub_resource type="Sky" id="Sky_dusk"]
 sky_material = SubResource("SkyMaterial_dusk")
@@ -24,21 +24,28 @@ sky_material = SubResource("SkyMaterial_dusk")
 background_mode = 2
 sky = SubResource("Sky_dusk")
 ambient_light_source = 3
-ambient_light_color = Color(0.62, 0.59, 0.54, 1)
-ambient_light_energy = 0.6
+ambient_light_color = Color(0.68, 0.65, 0.6, 1)
+ambient_light_energy = 0.78
 reflected_light_source = 2
 tonemap_mode = 3
 fog_enabled = true
-fog_light_color = Color(0.53, 0.57, 0.57, 1)
-fog_density = 0.006
-fog_sky_affect = 0.55
+fog_light_color = Color(0.42, 0.47, 0.5, 1)
+fog_density = 0.0045
+fog_sky_affect = 0.38
 
 [sub_resource type="PlaneMesh" id="Plane_ground"]
 size = Vector2(60, 140)
 
 [sub_resource type="StandardMaterial3D" id="Material_ground"]
-albedo_color = Color(0.18, 0.27, 0.16, 1)
+albedo_color = Color(0.68, 0.76, 0.62, 1)
+albedo_texture = ExtResource("10_ground_diff")
 roughness = 1.0
+roughness_texture = ExtResource("12_ground_rough")
+normal_enabled = true
+normal_scale = 0.78
+normal_texture = ExtResource("11_ground_normal")
+uv1_scale = Vector3(0.24, 0.24, 0.24)
+uv1_triplanar = true
 
 [sub_resource type="BoxShape3D" id="Shape_ground"]
 size = Vector3(60, 0.2, 140)
@@ -104,11 +111,12 @@ script = ExtResource("1_main")
 environment = SubResource("Environment_main")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-24, -38, 0)
-light_color = Color(1, 0.63, 0.39, 1)
-light_energy = 1.45
+rotation_degrees = Vector3(-18, -42, 0)
+light_color = Color(1, 0.84, 0.7, 1)
+light_energy = 0.82
 shadow_enabled = true
-directional_shadow_max_distance = 90.0
+directional_shadow_max_distance = 110.0
+directional_shadow_fade_start = 0.8
 
 [node name="Ground" type="StaticBody3D" parent="."]
 
