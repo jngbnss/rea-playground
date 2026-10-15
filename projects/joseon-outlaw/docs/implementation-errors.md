@@ -125,3 +125,13 @@
 - 원인: 신규 폰트를 Godot 에디터 import 전에 런타임 씬에서 바로 불러옴
 - 복구: `godot --headless --editor --path game --quit`으로 import를 선행한 뒤 같은 GUI 스모크를 재실행했다. 오류 없이 두 서체와 UI가 렌더되고 페이즈 7 전체 스모크가 통과했다.
 - 상태: 해결
+
+## 현실적 오픈소스 비주얼
+
+### RV-E001 · Linux CI에서 Git LFS 자산 미다운로드
+
+- 발생 단계: Pull Request GitHub Actions
+- 증상: Python 검사는 통과했지만 Godot가 HDRI와 PBR 텍스처를 불러오지 못해 메인 씬 로딩 실패
+- 원인: `actions/checkout`이 Git LFS 포인터만 받고 실제 바이너리를 내려받지 않음
+- 복구: 빌드와 Pages 체크아웃에 `lfs: true`를 설정하고 Godot import가 끝날 때까지 기다리는 `--quit` 방식으로 변경했다.
+- 상태: 해결

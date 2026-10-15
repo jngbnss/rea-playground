@@ -1,11 +1,11 @@
 class_name JoseonWorld
 extends Node3D
 
-var _wood := _material(Color("5a351f"))
-var _wood_dark := _material(Color("291f1a"))
-var _plaster := _material(Color("d8c9a6"))
-var _roof := _material(Color("24353b"), 0.25)
-var _path := _material(Color("9b6840"))
+var _wood := _pbr_material("weathered_brown_planks", Color("6f5b49"), 0.9)
+var _wood_dark := _pbr_material("weathered_brown_planks", Color("332b25"), 1.15)
+var _plaster := _pbr_material("plastered_wall_02", Color("817b70"), 0.8)
+var _roof := _pbr_material("grey_roof_tiles", Color("697278"), 0.72)
+var _path := _pbr_material("dirt_floor", Color("756b5f"), 0.32)
 var _pine := _material(Color("334e32"))
 var _pine_light := _material(Color("496540"))
 var _stone := _material(Color("686b67"))
@@ -27,10 +27,10 @@ func _ready() -> void:
 
 func _build_distant_mountains() -> void:
     for entry in [
-        [Vector3(-24, 5, -44), Vector3(12, 15, 8), Color("354c4d")],
-        [Vector3(24, 6, -52), Vector3(15, 18, 10), Color("405457")],
-        [Vector3(-22, 7, -76), Vector3(18, 22, 12), Color("607174")],
-        [Vector3(20, 8, -84), Vector3(20, 25, 14), Color("718084")],
+        [Vector3(-24, 5, -44), Vector3(12, 15, 8), Color("263b3d")],
+        [Vector3(24, 6, -52), Vector3(15, 18, 10), Color("30464a")],
+        [Vector3(-22, 7, -76), Vector3(18, 22, 12), Color("40565b")],
+        [Vector3(20, 8, -84), Vector3(20, 25, 14), Color("4b6167")],
     ]:
         _mountain(entry[0], entry[1], _material(entry[2]))
 
@@ -123,9 +123,15 @@ func _gate(position: Vector3) -> void:
 
 
 func _tree(position: Vector3) -> void:
-    _cylinder(position + Vector3(0, 1.45, 0), 0.25, 2.9, _wood)
-    _cylinder(position + Vector3(0, 3.15, 0), 1.7, 2.7, _pine, 0.15)
-    _cylinder(position + Vector3(0, 4.45, 0), 1.25, 2.2, _pine_light, 0.05)
+    _cylinder(position + Vector3(0, 2.1, 0), 0.24, 4.2, _wood)
+    for crown in [
+        [Vector3(-0.35, 2.8, 0.12), Vector3(1.55, 0.62, 1.15), _pine],
+        [Vector3(0.45, 3.2, -0.18), Vector3(1.35, 0.7, 1.25), _pine_light],
+        [Vector3(-0.18, 3.75, 0.0), Vector3(1.25, 0.66, 1.0), _pine],
+        [Vector3(0.22, 4.25, 0.1), Vector3(0.95, 0.58, 0.82), _pine_light],
+        [Vector3(-0.08, 4.72, -0.05), Vector3(0.68, 0.52, 0.62), _pine],
+    ]:
+        _sphere(position + crown[0], crown[1], crown[2])
 
 
 func _grass_cluster(position: Vector3) -> void:
@@ -180,13 +186,13 @@ func _campfire(position: Vector3) -> void:
 
 func _mountain(position: Vector3, size: Vector3, material: StandardMaterial3D) -> void:
     var mesh_instance := MeshInstance3D.new()
-    mesh_instance.position = position
-    mesh_instance.scale = Vector3(size.x / size.y, 1.0, size.z / size.y)
-    var mesh := CylinderMesh.new()
-    mesh.bottom_radius = size.y * 0.5
-    mesh.top_radius = 0.2
-    mesh.height = size.y
-    mesh.radial_segments = 8
+    mesh_instance.position = position - Vector3(0, size.y * 0.08, 0)
+    mesh_instance.scale = Vector3(size.x, size.y * 0.58, size.z)
+    var mesh := SphereMesh.new()
+    mesh.radius = 1.0
+    mesh.height = 2.0
+    mesh.radial_segments = 18
+    mesh.rings = 8
     mesh_instance.mesh = mesh
     mesh_instance.material_override = material
     mesh_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -238,6 +244,35 @@ func _cylinder(position: Vector3, radius: float, height: float, material: Standa
     mesh_instance.mesh = mesh
     mesh_instance.material_override = material
     add_child(mesh_instance)
+
+
+func _sphere(position: Vector3, scale_value: Vector3, material: StandardMaterial3D) -> void:
+    var mesh_instance := MeshInstance3D.new()
+    mesh_instance.position = position
+    mesh_instance.scale = scale_value
+    var mesh := SphereMesh.new()
+    mesh.radius = 1.0
+    mesh.height = 2.0
+    mesh.radial_segments = 12
+    mesh.rings = 6
+    mesh_instance.mesh = mesh
+    mesh_instance.material_override = material
+    add_child(mesh_instance)
+
+
+static func _pbr_material(asset_id: String, tint: Color, tiling: float) -> StandardMaterial3D:
+    var base_path := "res://assets/polyhaven/%s/%s" % [asset_id, asset_id]
+    var material := StandardMaterial3D.new()
+    material.albedo_color = tint
+    material.albedo_texture = load(base_path + "_diff_1k.jpg")
+    material.normal_enabled = true
+    material.normal_scale = 0.72
+    material.normal_texture = load(base_path + "_nor_gl_1k.jpg")
+    material.roughness = 1.0
+    material.roughness_texture = load(base_path + "_rough_1k.jpg")
+    material.uv1_scale = Vector3.ONE * tiling
+    material.uv1_triplanar = true
+    return material
 
 
 static func _material(color: Color, metallic := 0.0) -> StandardMaterial3D:

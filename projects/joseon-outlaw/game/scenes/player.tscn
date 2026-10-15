@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 
@@ -29,6 +29,21 @@ radial_segments = 16
 [sub_resource type="BoxMesh" id="Mesh_sword"]
 size = Vector3(0.07, 0.07, 1.25)
 
+
+[sub_resource type="CylinderMesh" id="Mesh_robe"]
+top_radius = 0.3
+bottom_radius = 0.46
+height = 1.1
+radial_segments = 20
+
+[sub_resource type="CapsuleMesh" id="Mesh_arm"]
+radius = 0.095
+height = 0.78
+radial_segments = 12
+rings = 4
+
+[sub_resource type="BoxMesh" id="Mesh_foot"]
+size = Vector3(0.22, 0.12, 0.4)
 [sub_resource type="StandardMaterial3D" id="Material_cloth"]
 albedo_color = Color(0.18, 0.28, 0.33, 1)
 roughness = 0.9
@@ -56,6 +71,33 @@ position = Vector3(0, 0.86, 0)
 mesh = SubResource("Mesh_body")
 material_override = SubResource("Material_cloth")
 
+[node name="Robe" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0, 0.57, 0)
+mesh = SubResource("Mesh_robe")
+material_override = SubResource("Material_cloth")
+
+[node name="ArmLeft" type="MeshInstance3D" parent="Visual"]
+position = Vector3(-0.43, 1.13, 0)
+rotation_degrees = Vector3(0, 0, -8)
+mesh = SubResource("Mesh_arm")
+material_override = SubResource("Material_cloth")
+
+[node name="ArmRight" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0.43, 1.13, 0)
+rotation_degrees = Vector3(0, 0, 8)
+mesh = SubResource("Mesh_arm")
+material_override = SubResource("Material_cloth")
+
+[node name="FootLeft" type="MeshInstance3D" parent="Visual"]
+position = Vector3(-0.2, 0.09, -0.07)
+mesh = SubResource("Mesh_foot")
+material_override = SubResource("Material_dark")
+
+[node name="FootRight" type="MeshInstance3D" parent="Visual"]
+position = Vector3(0.2, 0.09, -0.07)
+mesh = SubResource("Mesh_foot")
+material_override = SubResource("Material_dark")
+
 [node name="Head" type="MeshInstance3D" parent="Visual"]
 position = Vector3(0, 1.67, 0)
 mesh = SubResource("Mesh_head")
@@ -78,16 +120,16 @@ mesh = SubResource("Mesh_sword")
 material_override = SubResource("Material_dark")
 
 [node name="CameraRig" type="Node3D" parent="."]
-position = Vector3(0, 1.35, 0)
+position = Vector3(0, 1.48, 0)
 
 [node name="Pitch" type="Node3D" parent="CameraRig"]
-rotation_degrees = Vector3(-16, 0, 0)
+rotation_degrees = Vector3(-13, 0, 0)
 
 [node name="SpringArm3D" type="SpringArm3D" parent="CameraRig/Pitch"]
-spring_length = 5.5
+spring_length = 5.8
 margin = 0.15
 collision_mask = 1
 
 [node name="Camera3D" type="Camera3D" parent="CameraRig/Pitch/SpringArm3D"]
 current = true
-fov = 65.0
+fov = 58.0
