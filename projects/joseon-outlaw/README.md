@@ -37,15 +37,16 @@
 
 ## 실행
 
-Python 3.11 이상, 외부 패키지 없음.
+Python 3.11 이상과 Godot 4.7.2 표준 빌드를 사용한다.
 
 ```bash
 cd projects/joseon-outlaw
-python run_smoke.py                 # 전체 스모크 테스트 + 각 검사 도구
-python -m tools.fsm                 # 상태 기계 검사
-python -m tools.ledger              # 라이선스 대장 검사
-python -m tools.llm_bench --mock    # LLM 벤치마크 파이프라인 점검
+python run_smoke.py                 # 데이터·계약·도구 검사
+python -m tools.godot_smoke --phase 1
+python -m tools.export_windows      # Windows 내보내기 후 실행 파일 기동
 ```
+
+에디터에서는 `game/project.godot`을 연다. 명령행 실행은 `godot --path game`이다. 기준 PC와 도구 버전은 [`docs/environment.md`](docs/environment.md), 단계별 완료 기준은 [`docs/implementation-checklist.md`](docs/implementation-checklist.md), 구현 중 오류는 [`docs/implementation-errors.md`](docs/implementation-errors.md)에 기록한다.
 
 ## 11. AI 계약 요약
 
