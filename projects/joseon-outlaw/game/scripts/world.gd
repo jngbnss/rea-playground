@@ -50,7 +50,6 @@ func _build_village() -> void:
     _hanok(Vector3(8, 0, -3), Vector3(7, 3.5, 5.5), "덕순 주막")
     _hanok(Vector3(-9, 0, -10), Vector3(5, 2.8, 4.5), "창고")
     _gate(Vector3(0, 0, -13))
-    _marker(Vector3(0, 4.2, 8), "청송골")
     _box("MarketBannerLeft", Vector3(-4.2, 2.0, -12.7), Vector3(0.8, 2.2, 0.08), _red, false)
     _box("MarketBannerRight", Vector3(4.2, 2.0, -12.7), Vector3(0.8, 2.2, 0.08), _red, false)
     for position in [Vector3(-4, 2.5, 4), Vector3(4, 2.5, -5), Vector3(-3, 2.5, -11)]:

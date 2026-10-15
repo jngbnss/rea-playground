@@ -16,6 +16,10 @@ signal died
 
 @onready var visual: Node3D = $Visual
 @onready var sword: MeshInstance3D = $Visual/Sword
+@onready var left_arm: Node3D = $Visual/ArmLeftPivot
+@onready var right_arm: Node3D = $Visual/ArmRightPivot
+@onready var left_leg: Node3D = $Visual/LegLeftPivot
+@onready var right_leg: Node3D = $Visual/LegRightPivot
 @onready var camera_rig: Node3D = $CameraRig
 @onready var pitch: Node3D = $CameraRig/Pitch
 
@@ -127,7 +131,7 @@ func _animate_attack() -> void:
         _attack_tween.kill()
     _attack_tween = create_tween()
     _attack_tween.tween_property(sword, "rotation_degrees:z", -95.0, 0.1)
-    _attack_tween.tween_property(sword, "rotation_degrees:z", -8.0, 0.2)
+    _attack_tween.tween_property(sword, "rotation_degrees:z", -9.0, 0.2)
 
 
 func _set_movement_state(direction: Vector3, sprinting: bool) -> void:
@@ -135,7 +139,15 @@ func _set_movement_state(direction: Vector3, sprinting: bool) -> void:
     if next != movement_state:
         movement_state = next
         movement_state_changed.emit(next)
-    var bob := sin(Time.get_ticks_msec() * 0.012) * 0.035 if next in ["walk", "run"] else 0.0
+    var moving := next in ["walk", "run"]
+    var cadence := 0.017 if next == "run" else 0.011
+    var amplitude := 30.0 if next == "run" else 20.0
+    var stride := sin(Time.get_ticks_msec() * cadence) * amplitude if moving else 0.0
+    left_arm.rotation_degrees.x = lerpf(left_arm.rotation_degrees.x, stride, 0.28)
+    right_arm.rotation_degrees.x = lerpf(right_arm.rotation_degrees.x, -stride, 0.28)
+    left_leg.rotation_degrees.x = lerpf(left_leg.rotation_degrees.x, -stride * 0.65, 0.28)
+    right_leg.rotation_degrees.x = lerpf(right_leg.rotation_degrees.x, stride * 0.65, 0.28)
+    var bob := absf(sin(Time.get_ticks_msec() * cadence)) * 0.025 if moving else 0.0
     visual.position.y = lerpf(visual.position.y, bob, 0.25)
 
 
